@@ -5,7 +5,6 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 
 //Route
-import homeRouter from './routes/home.js'
 import userRouter from './routes/user.js'
 
 const app = express()
@@ -25,7 +24,6 @@ const connect = () => {
   	};
   
 //Use route
-app.use('/api/home', homeRouter)
 app.use('/api/register', userRouter)
 
 app.use(bodyParser.json({limit: "30mb", extended: true}))
