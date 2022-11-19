@@ -1,39 +1,63 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
-const SubjectSchema = new mongoose.Schema(
-    {
-      name: {
-        type: String,
-        required: true,
-        ref: 'Subject',
-      },
-      subject_code: {
-        type: String,
-        required: true,
-        ref: 'Subject_code'
-      },
-      credits: {
-        type: Number,
-        default: "",
-      },
-      type: {
-        type: String,
-        enum: ["D", "D+", "C", "C+", "B", "B+", "A"],
-        required: true,
-      },
-      user_num: {
-        type: Number,
-        default: "",
-      },  
-      created_at: {
-        type: Date,
-        default: Date.now(),
-      },
-      updated_at: {
-        type: Date,
-        default: Date.now(),
-      },    
-    }
-  )
-  
-  export default mongoose.model("Subject", SubjectSchema)
+const SubjectSchema = new mongoose.Schema({
+  school_id: {
+    type: String,
+    required: true,
+  },
+  department_id: {
+    type: String,
+    required: true,
+  },
+  category_id: {
+    type: String,
+    required: true,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  code: {
+    type: String,
+    required: true,
+  },
+  credits: {
+    type: Number,
+    required: true,
+    default: 2,
+  },
+  ratio: {
+    type: String,
+    required: true,
+    default: "5-5",
+  },
+  student_amount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  student_passed_amount: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  average_score: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  review: {
+    type: [String],
+    default: [],
+  },
+  created_at: {
+    type: Date,
+    default: Date.now(),
+  },
+  updated_at: {
+    type: Date,
+    default: Date.now(),
+  },
+});
+
+export default mongoose.model("Subject", SubjectSchema);
