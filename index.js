@@ -1,19 +1,22 @@
-import express from "express";
-// import bodyParser from 'body-parser'
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
 import morgan from "morgan";
+import path from "path";
+import { fileURLToPath } from "url";
 
 //Route
-import userRouter from "./routes/user.js";
 import authRouter from "./routes/auth.js";
-import tokenRouter from "./routes/token.js";
-import schoolRouter from "./routes/school.js";
-import departmentRouter from "./routes/department.js";
 import categoryRouter from "./routes/category.js";
+import departmentRouter from "./routes/department.js";
+import postRouter from "./routes/post.js";
+import schoolRouter from "./routes/school.js";
 import subjectRouter from "./routes/subject.js";
 import subjectScoreRouter from "./routes/subjectScore.js";
+import tagRouter from "./routes/tag.js";
+import tokenRouter from "./routes/token.js";
+import userRouter from "./routes/user.js";
 
 const corsOptions = {
   methods: ["GET", "PUT", "POST", "DELETE"],
@@ -36,8 +39,12 @@ const connect = () => {
       throw err;
     });
 };
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/public", express.static(path.join(__dirname, "public")));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(cors(corsOptions));
 
 //Use route
@@ -49,11 +56,10 @@ app.use("/api/department", departmentRouter);
 app.use("/api/category", categoryRouter);
 app.use("/api/subject", subjectRouter);
 app.use("/api/subjectScore", subjectScoreRouter);
+app.use("/api/tag", tagRouter);
+app.use("/api/post", postRouter);
 
 app.listen(PORT, () => {
   connect();
   console.log("Connected to Server");
 });
-
-// app.use(bodyParser.json({limit: "30mb", extended: true}))
-// app.use(bodyParser.urlencoded({limit: "30mb", extended: true}))

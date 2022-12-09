@@ -1,16 +1,14 @@
-import User from "../models/User.js";
 import CONFIG_STATUS from "../config/status.json";
+import { dataHandle } from "../middlewares/dataHandle.js";
 import {
   checkExistUser,
   deleteUser,
+  getAllUser,
   getUserByID,
   getUserInfo,
   updateUserByID,
-  getAllUser,
 } from "../service/user.js";
-import { dataHandle } from "../middlewares/dataHandle.js";
-import { verifyToken } from "../utils/security.js";
-import { generatePassword } from "../utils/security.js";
+import { generatePassword, verifyToken } from "../utils/security.js";
 
 export const getAllUserController = async (req, res) => {
   const user_list = await getAllUser();

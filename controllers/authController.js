@@ -71,7 +71,9 @@ export const loginController = async (req, res, next) => {
           }),
           refresh_token: updates.result.refresh_token,
           user_info: {
+            name: info.name,
             email: info.email,
+            avatar: info.avatar,
             educationStatus: info.educationStatus,
             _id: info._id,
             role: info.role,

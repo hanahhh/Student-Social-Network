@@ -54,7 +54,7 @@ export const updateSchoolByIdController = async (req, res) => {
   const { school_id } = req.params;
   const { name, school_code, student_amount } = req.body;
 
-  if (school_code == null || name == null) {
+  if (school_code == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
       message: "Request body is invalid.",
