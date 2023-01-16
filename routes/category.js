@@ -11,12 +11,7 @@ import {
 
 const router = express.Router();
 
-router.get(
-  "/",
-  requireLogin,
-  requireRole(["ADMIN"]),
-  TryCatch(getAllCategoryController)
-);
+router.get("/", requireLogin, TryCatch(getAllCategoryController));
 
 router.post("/create", requireLogin, TryCatch(createCategoryController));
 

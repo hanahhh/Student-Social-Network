@@ -77,6 +77,7 @@ export const loginController = async (req, res, next) => {
             educationStatus: info.educationStatus,
             _id: info._id,
             role: info.role,
+            cpa: info.cpa,
           },
         },
       });

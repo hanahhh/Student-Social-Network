@@ -31,16 +31,6 @@ const SubjectSchema = new mongoose.Schema({
     required: true,
     default: "5-5",
   },
-  student_amount: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
-  student_passed_amount: {
-    type: Number,
-    required: true,
-    default: 0,
-  },
   average_score: {
     type: Number,
     required: true,

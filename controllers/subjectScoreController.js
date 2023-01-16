@@ -1,22 +1,21 @@
 import CONFIG_STATUS from "../config/status.json";
+import { getSubjectScoreFinal } from "../config/subjectScore.js";
 import { dataHandle } from "../middlewares/dataHandle.js";
+import { checkExistSemester } from "../service/semester.js";
+import { checkExistSubject } from "../service/subject.js";
 import {
-  createSubjectScore,
-  getAllSubjectScore,
   checkExistSubjectScore,
-  getSubjectScoreByID,
-  updateSubjectScoreByID,
+  createSubjectScore,
+  deleteSubjectScore,
+  getAllSubjectScore,
   getAllSubjectScoreByUser,
   getAllSubjectScoreSemesterByUser,
-  getGPAScoreRecommendation,
   getCPAScoreRecommendation,
+  getGPAScoreRecommendation,
+  getSubjectScoreByID,
+  updateSubjectScoreByID,
 } from "../service/subjectScore.js";
-import {
-  checkExistSubject,
-  getSubjectByID,
-  updateSubjectByID,
-} from "../service/subject.js";
-import { checkExistUser } from "../service/user.js";
+import { checkExistUser, updateUserCPA } from "../service/user.js";
 
 export const getAllSubjectScoreController = async (req, res) => {
   const subjectScore_list = await getAllSubjectScore();
@@ -24,8 +23,8 @@ export const getAllSubjectScoreController = async (req, res) => {
 };
 
 export const createSubjectScoreController = async (req, res, next) => {
-  const { user_id, subject_id, subject_status, semester, schedule } = req.body;
-  if (user_id == null || subject_id == null) {
+  const { user_id, subject_id, semester_id, schedule } = req.body;
+  if (user_id == null || subject_id == null || semester_id == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
       message: "Request body is invalid. Please try again.",
@@ -33,6 +32,7 @@ export const createSubjectScoreController = async (req, res, next) => {
   } else {
     const checkSubject = await checkExistSubject(subject_id);
     const checkUser = await checkExistUser(user_id);
+    const checkSemester = await checkExistSemester(semester_id);
     if (!checkSubject.isExist) {
       res.status(400).send({
         status: CONFIG_STATUS.FAIL,
@@ -43,17 +43,15 @@ export const createSubjectScoreController = async (req, res, next) => {
         status: CONFIG_STATUS.FAIL,
         message: "User is not exists. Please try again.",
       });
+    } else if (!checkSemester.isExist) {
+      res.status(400).send({
+        status: CONFIG_STATUS.FAIL,
+        message: "Semester is not exists. Please try again.",
+      });
     } else {
       const result = await createSubjectScore(req.body);
 
       if (result.status != 0) {
-        const subject = await getSubjectByID(subject_id);
-        await updateSubjectByID(
-          {
-            student_amount: subject.subject_detail.student_amount + 1,
-          },
-          subject_id
-        );
         res.status(200).send({
           ...result,
         });
@@ -71,6 +69,7 @@ export const getAllSubjectScoreByUserController = async (req, res) => {
   const isExist = await checkExistUser(user_id);
   if (isExist) {
     const subjectScoreList = await getAllSubjectScoreByUser(user_id);
+
     dataHandle(subjectScoreList, req, res);
   } else {
     res.status(400).send({
@@ -81,12 +80,13 @@ export const getAllSubjectScoreByUserController = async (req, res) => {
 };
 
 export const getAllSubjectScoreSemesterByUserController = async (req, res) => {
-  const { user_id, semester } = req.query;
-  const isExist = await checkExistUser(user_id);
-  if (isExist) {
+  const { user_id, semester_id } = req.query;
+  const existUser = await checkExistUser(user_id);
+  const existSemester = await checkExistSemester(semester_id);
+  if (existUser.isExist && existSemester.isExist) {
     const subjectScoreList = await getAllSubjectScoreSemesterByUser(
       user_id,
-      semester
+      semester_id
     );
     dataHandle(subjectScoreList, req, res);
   } else {
@@ -98,12 +98,12 @@ export const getAllSubjectScoreSemesterByUserController = async (req, res) => {
 };
 
 export const getGPAScoreRecommendationController = async (req, res) => {
-  const { user_id, semester, gpa } = req.query;
+  const { user_id, semester_id, gpa } = req.query;
   const isExist = await checkExistUser(user_id);
   if (isExist) {
     const recommendation = await getGPAScoreRecommendation(
       user_id,
-      semester,
+      semester_id,
       gpa
     );
     dataHandle(recommendation, req, res);
@@ -145,41 +145,46 @@ export const getSubjectScoreByIDController = async (req, res) => {
 
 export const updateSubjectScoreByIdController = async (req, res) => {
   const { subjectScore_id } = req.params;
-  const { user_id, subject_id } = req.body;
+  const { midterm_score, endterm_score, user_id } = req.body;
 
-  if (subject_id == null) {
-    res.status(400).send({
-      status: CONFIG_STATUS.FAIL,
-      message: "Request body is invalid.",
+  let updates = {
+    ...req.body,
+    updated_at: Date.now(),
+  };
+
+  const subjectScore = await getSubjectScoreByID(subjectScore_id);
+
+  //update cpa
+  let newCPACredits = {
+    subject_status: subjectScore.subjectScore_detail.subject_status,
+  };
+  if (midterm_score && endterm_score) {
+    newCPACredits = getSubjectScoreFinal(
+      midterm_score,
+      endterm_score,
+      subjectScore.subjectScore_detail.ratio.split("-")[0] - "0"
+    );
+  }
+
+  //update subject-score
+  updates = {
+    ...updates,
+    subject_status: newCPACredits.subject_status,
+    final_score: newCPACredits.final_score,
+    final_score_char: newCPACredits.final_score_char,
+    updated_at: Date.now(),
+  };
+
+  const result = await updateSubjectScoreByID(updates, subjectScore_id);
+  await updateUserCPA(user_id);
+  if (result.status == 0) {
+    res.status(500).send({
+      ...result,
     });
   } else {
-    let updates = {
-      ...req.body,
-      updated_at: Date.now(),
-    };
-    //increase student amount
-    if (updates.subject_status == 0) {
-      const subject = await getSubjectScoreByID(subjectScore_id);
-      if (subject.subjectScore_detail.subject_status != 0) {
-        await updateSubjectByID(
-          {
-            student_passed_amount:
-              subject.subject_detail.student_passed_amount + 1,
-          },
-          subject_id
-        );
-      }
-    }
-    const result = await updateSubjectScoreByID(updates, subjectScore_id);
-    if (result.status == 0) {
-      res.status(500).send({
-        ...result,
-      });
-    } else {
-      res.send({
-        ...result,
-      });
-    }
+    res.send({
+      ...result,
+    });
   }
 };
 
@@ -187,7 +192,7 @@ export const deleteSubjectScoreController = async (req, res) => {
   const { subjectScore_id } = req.params;
   const { isExist } = await checkExistSubjectScore(subjectScore_id);
   if (isExist) {
-    const subjectScore = await deleteSubject(subjectScore_id);
+    const subjectScore = await deleteSubjectScore(subjectScore_id);
     res.send({
       status: CONFIG_STATUS.SUCCESS,
       message: "Delete subject score successful.",

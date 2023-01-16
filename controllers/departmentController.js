@@ -7,11 +7,18 @@ import {
   getDepartmentByID,
   deleteDepartment,
   updateDepartmentByID,
+  getAllDepartmentBySchool,
 } from "../service/department.js";
 import { checkExistSchool } from "../service/school.js";
 
 export const getAllDepartmentController = async (req, res) => {
   const department_list = await getAllDepartment();
+  dataHandle(department_list, req, res);
+};
+
+export const getAllDepartmentBySchoolController = async (req, res) => {
+  const { school_id } = req.params;
+  const department_list = await getAllDepartmentBySchool(school_id);
   dataHandle(department_list, req, res);
 };
 

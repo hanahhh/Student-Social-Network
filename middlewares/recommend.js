@@ -1,4 +1,6 @@
-export const recommendGPAScore = (M, b) => {
+import { roundNumber } from "../config/subjectScore.js";
+
+export const recommendGPAScore = (M, b, subjectList) => {
   const scores = [1, 1.5, 2, 2.5, 3, 3.5, 4];
   const scoreA = ["D", "D+", "C", "C+", "B", "B+", "A"];
   let result = [];
@@ -6,10 +8,17 @@ export const recommendGPAScore = (M, b) => {
   const n = b.length;
   let T = 0,
     sum = 0;
-  let x = [];
+  let x;
 
-  const solution = (T) => {
-    result.push({ subjectList: x, score: T });
+  const solution = (T, x) => {
+    const subjects = x.map((score, index) => {
+      return {
+        subjectScore_id: subjectList[index]._id,
+        score: score,
+        subject: subjectList[index].subject,
+      };
+    });
+    result.push({ subjectList: subjects.slice(), score: roundNumber(T) });
   };
 
   const check = (v, k) => {
@@ -22,7 +31,7 @@ export const recommendGPAScore = (M, b) => {
       if (check(v, k)) {
         x[k] = scoreA[v];
         T = T + (scores[v] * b[k]) / sum;
-        if (k == n - 1) solution(T);
+        if (k == n - 1) solution(T, x);
         else Try(k + 1);
         T = T - (scores[v] * b[k]) / sum;
       }
@@ -32,12 +41,13 @@ export const recommendGPAScore = (M, b) => {
   const solve = () => {
     for (let i = 0; i < n; i++) {
       sum += b[i];
-      x[i] = "";
     }
+    x = new Array(n);
     T = 0;
     Try(0);
   };
   solve();
+  result.sort((a, b) => a.score - b.score);
   return result;
 };
 

@@ -2,6 +2,7 @@ import express from "express";
 import { TryCatch } from "../middlewares/errorHandle.js";
 import { requireLogin, requireRole } from "../middlewares/auth.js";
 import {
+  addCommentSubjectController,
   createSubjectController,
   deleteSubjectController,
   getAllSubjectController,
@@ -14,6 +15,11 @@ const router = express.Router();
 router.get("/", requireLogin, TryCatch(getAllSubjectController));
 
 router.post("/create", requireLogin, TryCatch(createSubjectController));
+router.put(
+  "/comments/:subject_id",
+  requireLogin,
+  TryCatch(addCommentSubjectController)
+);
 
 router.get(
   "/detail/:subject_id",

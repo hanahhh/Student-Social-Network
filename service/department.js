@@ -34,6 +34,16 @@ export const getAllDepartment = async () => {
   };
 };
 
+export const getAllDepartmentBySchool = async (school_id) => {
+  const result = await Department.find(
+    { school_id },
+    "_id name school_id global_name sort_name student_amount"
+  );
+  return {
+    result,
+  };
+};
+
 export const createDepartment = async ({
   name,
   school_id,

@@ -3,6 +3,8 @@ import School from "../models/School.js";
 import Department from "../models/Department.js";
 import Category from "../models/Category.js";
 import CONFIG_STATUS from "../config/status.json";
+import SubjectScore from "../models/SubjectScore.js";
+import { subjectStatus } from "../config/systemStatus.js";
 
 export const checkExistSubject = async (subject_id) => {
   let isExist = Boolean;
@@ -57,13 +59,21 @@ export const createSubject = async ({
 export const getSubjectByID = async (subject_id) => {
   const subject = await Subject.findOne(
     { _id: subject_id },
-    "school_id department_id category_id name code credits ratio student_amount student_passed_amount average_score review"
+    "school_id department_id category_id name code credits ratio average_score review"
   );
   const school_detail = await School.findOne({ id: subject.school_id });
   const department_detail = await Department.findOne({
     id: subject.department_id,
   });
   const category_detail = await Category.findOne({ id: subject.category_id });
+
+  const student_amount = await SubjectScore.countDocuments({
+    subject_id: subject._id,
+  });
+  const student_passed_amount = await SubjectScore.countDocuments({
+    subject_id: subject._id,
+    subject_status: subjectStatus.PASSED,
+  });
   const subject_detail = {
     _id: subject._id,
     school: school_detail.name,
@@ -73,8 +83,8 @@ export const getSubjectByID = async (subject_id) => {
     code: subject.code,
     credits: subject.credits,
     ratio: subject.ratio,
-    student_amount: subject.student_amount,
-    student_passed_amount: subject.student_passed_amount,
+    student_amount: student_amount,
+    student_passed_amount: student_passed_amount,
     average_score: subject.average_score,
     review: subject.review,
   };

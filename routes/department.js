@@ -4,6 +4,7 @@ import { requireLogin, requireRole } from "../middlewares/auth.js";
 import {
   createDepartmentController,
   deleteDepartmentController,
+  getAllDepartmentBySchoolController,
   getAllDepartmentController,
   getDepartmentByIDController,
   updateDepartmentByIdController,
@@ -11,11 +12,12 @@ import {
 
 const router = express.Router();
 
+router.get("/", requireLogin, TryCatch(getAllDepartmentController));
+
 router.get(
-  "/",
+  "/school/:school_id",
   requireLogin,
-  requireRole(["ADMIN"]),
-  TryCatch(getAllDepartmentController)
+  TryCatch(getAllDepartmentBySchoolController)
 );
 
 router.post("/create", requireLogin, TryCatch(createDepartmentController));
@@ -28,7 +30,6 @@ router.get(
 router.put(
   "/detail/:department_id",
   requireLogin,
-  requireRole(["ADMIN"]),
   TryCatch(updateDepartmentByIdController)
 );
 

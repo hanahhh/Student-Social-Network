@@ -6,22 +6,36 @@ import {
   createPost,
   deletePost,
   getAllPost,
+  getAllPostByTagID,
   getAllPostByUserID,
   getPostByID,
   updatePostByID,
 } from "../service/post.js";
 import { checkExistTag, getTagByID, updateTagByID } from "../service/tag.js";
-import { checkExistUser, getUserByID } from "../service/user.js";
+import { checkExistUser } from "../service/user.js";
 
 export const getAllPostController = async (req, res) => {
   let post_list = await getAllPost();
+  const list = post_list.result;
+  for (let i = 0; i < list.length; i++) {
+    let tags = list[i].tags;
+    tags.forEach((tag) => {
+      return getTagByID(tag);
+    });
+  }
 
   dataHandle(post_list, req, res);
 };
 
 export const createPostController = async (req, res, next) => {
-  const { user_id, content, tags, image } = req.body;
-  if (user_id == null || content == null || image == null) {
+  const { user_id, content, tags, image, user_avatar, user_name } = req.body;
+  if (
+    user_id == null ||
+    content == null ||
+    image == null ||
+    user_avatar == null ||
+    user_name == null
+  ) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
       message: "Request body is invalid. Please try again.",
@@ -34,21 +48,20 @@ export const createPostController = async (req, res, next) => {
         message: "User is not exists. Please try again.",
       });
     }
-    const tag_list = tags.split(" ");
-    for (let i = 0; i < tag_list.length; i++) {
-      const check = await checkExistTag(tag_list[i]);
+
+    for (let i = 0; i < tags.length; i++) {
+      const check = await checkExistTag(tags[i]);
       if (!check) {
         res.status(500).send({
           ...check,
         });
       } else {
-        const tag = await getTagByID(tag_list[i]);
-        console.log(tag.tag_detail.post_amount);
+        const tag = await getTagByID(tags[i]);
         await updateTagByID(
           {
             post_amount: tag.tag_detail.post_amount + 1,
           },
-          tag_list[i]
+          tags[i]
         );
       }
     }
@@ -88,7 +101,6 @@ export const uploadPostImageController = async (req, res) => {
 export const uploadPostImageControllerByID = async (req, res) => {
   const { post_id } = req.params;
   const image = req.file;
-  console.log(image, post_id);
   if (post_id == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
@@ -147,6 +159,24 @@ export const getAllPostByUserIDController = async (req, res) => {
       message: "User is not exist.",
     });
   }
+};
+
+export const getAllPostByTagIDController = async (req, res) => {
+  const tagList = req.body;
+  let postList = [];
+  for (let i = 0; i < tagList.length; i++) {
+    const { isExist } = await checkExistTag(tagList[i]);
+    if (isExist) {
+      const post = await getAllPostByTagID(tagList[i]);
+      postList = postList.concat(post.result);
+    } else {
+      res.status(400).send({
+        status: CONFIG_STATUS.FAIL,
+        message: "Some tag is not exist.",
+      });
+    }
+  }
+  dataHandle(postList, req, res);
 };
 
 export const updatePostByIdController = async (req, res) => {

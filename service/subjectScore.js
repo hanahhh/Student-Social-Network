@@ -1,14 +1,18 @@
 import CONFIG_STATUS from "../config/status.json";
+import { getSubjectScoreFinal } from "../config/subjectScore.js";
+import { subjectStatus } from "../config/systemStatus.js";
 import {
   recommendCPAScore,
   recommendGPAScore,
 } from "../middlewares/recommend.js";
+import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import SubjectScore from "../models/SubjectScore.js";
+import { getSubjectByID } from "./subject.js";
 
 export const checkExistSubjectScore = async (subjectScore_id) => {
   let isExist = Boolean;
-  const checkExist = await Subject.exists({ _id: subjectScore_id });
+  const checkExist = await SubjectScore.exists({ _id: subjectScore_id });
   if (!checkExist) {
     isExist = false;
   } else {
@@ -25,14 +29,19 @@ export const getAllSubjectScore = async () => {
 };
 
 export const getAllSubjectScoreByUser = async (user_id) => {
-  const subjectScoreList = await SubjectScore.find({ user_id: user_id });
+  const subjectScoreList = await SubjectScore.find({
+    user_id: user_id,
+  });
   let subject_score_list = [];
   for (let i = 0; i < subjectScoreList.length; i++) {
     const subject_id = subjectScoreList[i].subject_id;
-    const subject = await Subject.findOne({ subject_id });
+    const semester_id = subjectScoreList[i].semester_id;
+    const subject = await Subject.findOne({ _id: subject_id });
+    const semester = await Semester.findOne({ _id: semester_id });
     const subjectScore = {
       _id: subjectScoreList[i]._id,
       user_id: subjectScoreList[i].user_id,
+      subject_id: subject._id,
       subject: subject.name,
       credits: subject.credits,
       ratio: subject.ratio,
@@ -41,7 +50,7 @@ export const getAllSubjectScoreByUser = async (user_id) => {
       final_score: subjectScoreList[i].final_score,
       final_score_char: subjectScoreList[i].final_score_char,
       subject_status: subjectScoreList[i].subject_status,
-      semester: subjectScoreList[i].semester,
+      semester: semester?.name,
       schedule: subjectScoreList[i].schedule,
     };
 
@@ -50,15 +59,18 @@ export const getAllSubjectScoreByUser = async (user_id) => {
   return subject_score_list;
 };
 
-export const getAllSubjectScoreSemesterByUser = async (user_id, semester) => {
+export const getAllSubjectScoreSemesterByUser = async (
+  user_id,
+  semester_id
+) => {
   let subjectScoreList = await SubjectScore.find({
     user_id: user_id,
-    semester: semester,
+    semester_id: semester_id,
   });
   let subject_score_list = [];
   for (let i = 0; i < subjectScoreList.length; i++) {
     const subject_id = subjectScoreList[i].subject_id;
-    const subject = await Subject.findOne({ subject_id });
+    const subject = await Subject.findOne({ _id: subject_id });
     const subjectScore = {
       _id: subjectScoreList[i]._id,
       user_id: subjectScoreList[i].user_id,
@@ -70,7 +82,6 @@ export const getAllSubjectScoreSemesterByUser = async (user_id, semester) => {
       final_score: subjectScoreList[i].final_score,
       final_score_char: subjectScoreList[i].final_score_char,
       subject_status: subjectScoreList[i].subject_status,
-      semester: subjectScoreList[i].semester,
       schedule: subjectScoreList[i].schedule,
     };
     subject_score_list.push(subjectScore);
@@ -78,22 +89,28 @@ export const getAllSubjectScoreSemesterByUser = async (user_id, semester) => {
   return subject_score_list;
 };
 
-export const getGPAScoreRecommendation = async (user_id, semester, gpa) => {
+export const getGPAScoreRecommendation = async (user_id, semester_id, gpa) => {
   const subjectScoreList = await getAllSubjectScoreSemesterByUser(
     user_id,
-    semester
+    semester_id
   );
-  const creditsList = subjectScoreList.map((score) => {
-    return score.credits;
-  });
-  const result = recommendGPAScore(gpa, creditsList);
+  let creditsList = [];
+  const subjectPredictedList = [];
+  for (let i = 0; i < subjectScoreList.length; i++) {
+    if (subjectScoreList[i].subject_status == subjectStatus.ONGOING) {
+      creditsList.push(subjectScoreList[i].credits);
+      subjectPredictedList.push(subjectScoreList[i]);
+    }
+  }
+
+  const result = recommendGPAScore(gpa, creditsList, subjectScoreList);
   return result;
 };
 
 export const getCPAScoreRecommendation = async (user_id, credits) => {
   const subjectScoreList = await getAllSubjectScoreByUser(user_id);
   const subjectList = subjectScoreList.map((score) => {
-    if (score.subject_status != 2)
+    if (score.subject_status !== subjectStatus.ONGOING)
       return { w: score.credits, v: score.final_score };
   });
   let result = recommendCPAScore(subjectList, credits);
@@ -108,15 +125,38 @@ export const getCPAScoreRecommendation = async (user_id, credits) => {
 };
 
 export const createSubjectScore = async (req) => {
-  const { user_id, subject_id, subject_status, semester, schedule } = req;
-  const isExist = await SubjectScore.exists({ user_id, subject_id });
+  const {
+    user_id,
+    subject_id,
+    subject_status,
+    semester_id,
+    schedule,
+    midterm_score,
+    endterm_score,
+    credits,
+  } = req;
+  const subject = await getSubjectByID(subject_id);
+  const score = getSubjectScoreFinal(
+    midterm_score ? midterm_score : 0,
+    endterm_score ? endterm_score : 0,
+    subject.subject_detail.ratio.split("-")[0] - "0"
+  );
+  const isExist = await SubjectScore.exists({
+    user_id,
+    subject_id,
+    semester_id,
+  });
   if (isExist) {
     return {
       status: CONFIG_STATUS.FAIL,
       message: "The subject score is already existed.",
     };
   } else {
-    await SubjectScore.create(req);
+    await SubjectScore.create({
+      ...req,
+      final_score: score.final_score,
+      final_score_char: score.final_score_char,
+    });
     return {
       status: CONFIG_STATUS.SUCCESS,
       message: "The subject score is created successful.",
@@ -127,12 +167,13 @@ export const createSubjectScore = async (req) => {
 export const getSubjectScoreByID = async (subjectScore_id) => {
   const subjectScore = await SubjectScore.findOne(
     { _id: subjectScore_id },
-    "user_id subject_id midterm_score endterm_score final_score final_score_char subject_status semester schedule"
+    "user_id subject_id midterm_score endterm_score final_score final_score_char subject_status semester_id schedule"
   );
   const subject_detail = await Subject.findOne({ id: subjectScore.subject_id });
   const subjectScore_detail = {
     _id: subjectScore._id,
     user_id: subjectScore.user_id,
+    subject_id: subject_detail._id,
     subject: subject_detail.name,
     credits: subject_detail.credits,
     ratio: subject_detail.ratio,
@@ -141,7 +182,7 @@ export const getSubjectScoreByID = async (subjectScore_id) => {
     final_score: subjectScore.final_score,
     final_score_char: subjectScore.final_score_char,
     subject_status: subjectScore.subject_status,
-    semester: subjectScore.semester,
+    semester_id: subjectScore.semester_id,
     schedule: subjectScore.schedule,
   };
   return {
@@ -151,10 +192,30 @@ export const getSubjectScoreByID = async (subjectScore_id) => {
 
 export const updateSubjectScoreByID = async (form, subjectScore_id) => {
   const checkExist = await SubjectScore.exists({ _id: subjectScore_id });
+  const updateSubjectScore = await getSubjectScoreByID({
+    _id: subjectScore_id,
+  });
+  const subject = await getSubjectByID(
+    updateSubjectScore?.subjectScore_detail.subject_id
+  );
+  const score = getSubjectScoreFinal(
+    form.midterm_score
+      ? form.midterm_score
+      : updateSubjectScore.subjectScore_detail.midterm_score,
+    form.endterm_score
+      ? form.endterm_score
+      : updateSubjectScore.subjectScore_detail.endterm_score,
+    subject.subject_detail.ratio.split("-")[0] - "0"
+  );
   if (checkExist) {
     const update_result = await SubjectScore.findByIdAndUpdate(
       subjectScore_id,
-      form,
+      {
+        ...form,
+        final_score: score.final_score,
+        final_score_char: score.final_score_char,
+        subject_status: score.subject_status,
+      },
       {
         new: true,
       }
@@ -173,15 +234,6 @@ export const updateSubjectScoreByID = async (form, subjectScore_id) => {
         "Update subject score failed, subject score id is not exist. Please try again",
     };
   }
-};
-
-const getSubjectScoreByUser = async (user_id) => {
-  let subjectScore_list = await SubjectScore.find({
-    user_id,
-  });
-  return {
-    subjectScore_list,
-  };
 };
 
 export const deleteSubjectScore = async (subjectScore_id) => {

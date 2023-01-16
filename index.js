@@ -17,6 +17,8 @@ import subjectScoreRouter from "./routes/subjectScore.js";
 import tagRouter from "./routes/tag.js";
 import tokenRouter from "./routes/token.js";
 import userRouter from "./routes/user.js";
+import semesterRouter from "./routes/semester.js";
+import predictResultRouter from "./routes/predictResult.js";
 
 const corsOptions = {
   methods: ["GET", "PUT", "POST", "DELETE"],
@@ -58,6 +60,8 @@ app.use("/api/subject", subjectRouter);
 app.use("/api/subjectScore", subjectScoreRouter);
 app.use("/api/tag", tagRouter);
 app.use("/api/post", postRouter);
+app.use("/api/semester", semesterRouter);
+app.use("/api/predictResult", predictResultRouter);
 
 app.listen(PORT, () => {
   connect();

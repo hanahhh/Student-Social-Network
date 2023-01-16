@@ -17,6 +17,8 @@ export const getAllPost = async () => {
   result = result.map((item, index) => {
     return {
       _id: item._id,
+      user_name: item.user_name,
+      user_avatar: item.user_avatar,
       user_id: item.user_id,
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
@@ -29,11 +31,16 @@ export const getAllPost = async () => {
 };
 
 export const getAllPostByUserID = async (user_id) => {
-  let result = await Post.find({ user_id }, "_id user_id content image tags");
+  let result = await Post.find(
+    { user_id },
+    "_id user_id user_name user_avatar content image tags"
+  );
   result = result.map((item, index) => {
     return {
       _id: item._id,
       user_id: item.user_id,
+      user_name: item.user_name,
+      user_avatar: item.user_avatar,
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
       tags: item.tags,
@@ -44,12 +51,42 @@ export const getAllPostByUserID = async (user_id) => {
   };
 };
 
-export const createPost = async ({ user_id, content, image, tags }) => {
+export const getAllPostByTagID = async (tag_id) => {
+  let result = await Post.find(
+    { tag_id },
+    "_id user_id user_name user_avatar content image tags"
+  );
+  result = result.map((item, index) => {
+    return {
+      _id: item._id,
+      user_id: item.user_id,
+      user_name: item.user_name,
+      user_avatar: item.user_avatar,
+      content: item.content,
+      image: item.image ? item.image.replaceAll("\\", "/") : item.image,
+      tags: item.tags,
+    };
+  });
+  return {
+    result,
+  };
+};
+
+export const createPost = async ({
+  user_id,
+  content,
+  image,
+  tags,
+  user_name,
+  user_avatar,
+}) => {
   await Post.create({
     user_id,
     content,
     tags,
     image,
+    user_avatar,
+    user_name,
   });
   return {
     status: CONFIG_STATUS.SUCCESS,

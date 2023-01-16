@@ -4,6 +4,7 @@ import { requireLogin, requireRole } from "../middlewares/auth.js";
 import {
   createPostController,
   deletePostController,
+  getAllPostByTagIDController,
   getAllPostByUserIDController,
   getAllPostController,
   getPostByIDController,
@@ -39,6 +40,7 @@ router.get(
   requireLogin,
   TryCatch(getAllPostByUserIDController)
 );
+router.post("/tag", requireLogin, TryCatch(getAllPostByTagIDController));
 router.put(
   "/detail/:post_id",
   requireLogin,

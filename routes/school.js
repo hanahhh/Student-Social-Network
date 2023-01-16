@@ -14,7 +14,7 @@ const router = express.Router();
 router.get(
   "/",
   requireLogin,
-  requireRole(["ADMIN"]),
+
   TryCatch(getAllSchoolController)
 );
 
@@ -27,7 +27,6 @@ router.get(
 router.put(
   "/detail/:school_id",
   requireLogin,
-  requireRole(["ADMIN"]),
   TryCatch(updateSchoolByIdController)
 );
 

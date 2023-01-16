@@ -66,7 +66,7 @@ export const updateTagByID = async (form, tag_id) => {
 };
 
 export const deleteTag = async (tag_id) => {
-  const result = await Category.findByIdAndDelete(tag_id);
+  const result = await Tag.findByIdAndDelete(tag_id);
   return {
     result,
   };

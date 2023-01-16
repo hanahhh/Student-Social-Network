@@ -1,4 +1,5 @@
 import CONFIG_STATUS from "../config/status.json";
+import { educationStatus } from "../config/systemStatus.js";
 import { dataHandle } from "../middlewares/dataHandle.js";
 import {
   checkExistUser,
@@ -19,7 +20,20 @@ export const getUserByIDController = async (req, res) => {
   const { user_id } = req.params;
   const isExist = await checkExistUser(user_id);
   if (isExist) {
-    const user = await getUserByID(user_id);
+    let user = await getUserByID(user_id);
+    const newUser = user.user;
+    if (newUser.educationStatus == educationStatus.DISABLE) {
+      user = {
+        name: newUser.name,
+        email: newUser.email,
+        avatar: newUser.avatar,
+        educationStatus: newUser.educationStatus,
+        description: newUser.description,
+        education: newUser.education,
+        nick_name: newUser.nick_name,
+        website: newUser.website,
+      };
+    }
     dataHandle(user, req, res);
   } else {
     res.status(400).send({

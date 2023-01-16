@@ -101,6 +101,36 @@ export const updateSubjectByIdController = async (req, res) => {
   }
 };
 
+export const addCommentSubjectController = async (req, res) => {
+  const { subject_id } = req.params;
+
+  const comments = req.body;
+  const { isExist } = await checkExistSubject(subject_id);
+  if (isExist) {
+    const subject = await getSubjectByID(subject_id);
+    const updates = {
+      ...subject.subject_detail,
+      review: [...subject?.subject_detail.review, ...comments],
+    };
+
+    const result = await updateSubjectByID(updates, subject_id);
+    if (result.status == 0) {
+      res.status(500).send({
+        ...result,
+      });
+    } else {
+      res.send({
+        ...result,
+      });
+    }
+  } else {
+    res.status(400).send({
+      status: CONFIG_STATUS.FAIL,
+      message: "Subject is not exist.",
+    });
+  }
+};
+
 export const deleteSubjectController = async (req, res) => {
   const { subject_id } = req.params;
   const { isExist } = await checkExistSubject(subject_id);

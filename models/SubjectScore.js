@@ -9,6 +9,10 @@ const SubjectScoreSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  semester_id: {
+    type: String,
+    required: true,
+  },
   midterm_score: {
     type: Number,
     default: 0,
@@ -23,16 +27,12 @@ const SubjectScoreSchema = new mongoose.Schema({
   },
   final_score_char: {
     type: String,
-    default: "NULL",
   },
   subject_status: {
     type: Number,
     enum: [0, 1, 2],
     default: 2,
     required: true,
-  },
-  semester: {
-    type: String,
   },
   schedule: {
     type: String,

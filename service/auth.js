@@ -9,7 +9,7 @@ export const login = async (email) => {
 export const getUserInfo = async (email) => {
   const info = await User.findOne(
     { email: email },
-    "email created_at updated_at educationStatus role name avatar"
+    "email created_at updated_at educationStatus role name avatar cpa"
   ).exec();
   return { info };
 };

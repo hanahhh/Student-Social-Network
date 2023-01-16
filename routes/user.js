@@ -6,8 +6,8 @@ import {
   getUserInfoController,
   updateUserByIdController,
 } from "../controllers/userController.js";
-import { TryCatch } from "../middlewares/errorHandle.js";
 import { requireLogin, requireRole } from "../middlewares/auth.js";
+import { TryCatch } from "../middlewares/errorHandle.js";
 const router = express.Router();
 
 router.get(

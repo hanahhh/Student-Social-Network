@@ -33,12 +33,20 @@ const UserSchema = new mongoose.Schema({
   },
   educationStatus: {
     type: Number,
-    default: 0,
+    default: 1,
   },
   role: {
     type: String,
     default: "USER",
     enum: ["USER", "ADMIN"],
+  },
+  cpa: {
+    type: Number,
+    default: 0,
+  },
+  credits: {
+    type: Number,
+    default: 0,
   },
   refresh_token: {
     type: String,
