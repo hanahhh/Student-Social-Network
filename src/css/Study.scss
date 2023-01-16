@@ -1,0 +1,22 @@
+.semester {
+    max-width: 100vw;
+    width: 100%;
+    
+    
+    .tab {
+        display: block;
+    }
+    .table {
+        width: 100%;
+        overflow-x: auto;
+    }
+}
+.ant-select {
+    margin: 0 !important;
+}
+.ant-table-wrapper {
+    width: fit-content !important;
+}
+.ant-collapse-item {
+    width: fit-content;
+}

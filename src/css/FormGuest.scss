@@ -1,0 +1,19 @@
+.col-guest {
+    background: white;
+    padding: 30px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--dark-grey);
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    justify-content: center !important;
+    .nav-guest {
+        display: flex;
+        justify-content: center;
+    }
+    .button-guest {
+        border-radius: 10px;
+        border: 1px solid var(--dark-grey);
+        background: white;
+        padding: 3px 20px;
+        cursor: pointer;
+    }
+}

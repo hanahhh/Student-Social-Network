@@ -1,0 +1,9 @@
+.post-user {
+    object-fit: cover;
+    width: calc((100vw - 320px)/3);
+    height: calc((100vw - 320px)/3);
+    @media only screen and (max-width: 768px) {
+        width: 32vw;
+        height: 32vw;
+    }
+}
