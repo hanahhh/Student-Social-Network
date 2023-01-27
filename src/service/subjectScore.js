@@ -98,3 +98,39 @@ export const getGPARecommendation = (user_id, semester, gpa, callback) => {
       }
     });
 };
+
+export const getCPARecommendation = (user_id, credits, callback) => {
+  const axios = AxiosConfig();
+  let api = `/subjectScore/recommend/cpa?user_id=${user_id}&credits=${credits}`;
+
+  axios
+    .get(api)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => (getCPARecommendation = (user_id, credits, callback)));
+      } else {
+        callback(err.response.data);
+      }
+    });
+};
+
+export const deleteSubjectScore = (id, callback) => {
+  const axios = AxiosConfig();
+  let api = `/subjectScore/${id}`;
+
+  axios
+    .delete(api)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => (deleteSubjectScore = (id, callback)));
+      } else {
+        callback(err.response.data);
+      }
+    });
+};

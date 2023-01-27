@@ -19,7 +19,13 @@ export const getListPost = (pagination, filter, sorter, callback) => {
     });
 };
 
-export const getMyPost = (user_id, pagination, filter, sorter, callback) => {
+export const getPostByUserID = (
+  user_id,
+  pagination,
+  filter,
+  sorter,
+  callback
+) => {
   const axios = AxiosConfig();
   let api = `/post/user/${user_id}`;
 
@@ -33,6 +39,24 @@ export const getMyPost = (user_id, pagination, filter, sorter, callback) => {
         getToken(() =>
           getMyPost(user_id, pagination, filter, sorter, callback)
         );
+      } else {
+        callback(err.response.data);
+      }
+    });
+};
+
+export const getMyPost = (pagination, filter, sorter, callback) => {
+  const axios = AxiosConfig();
+  let api = `post/own`;
+
+  axios
+    .get(api)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => getMyPost(pagination, filter, sorter, callback));
       } else {
         callback(err.response.data);
       }

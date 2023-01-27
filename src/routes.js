@@ -1,5 +1,7 @@
 import Roles from "./configs/roles";
 import Home from "./View/home/Home";
+import SubjectDetail from "./View/home/SubjectDetail";
+import NeighborDetail from "./View/neighborDetail/NeighborDetail";
 import PostList from "./View/post/PostList";
 import Setting from "./View/setting/Setting";
 import Service from "./View/systemService/Service";
@@ -39,6 +41,20 @@ const routes = [
     exact: true,
     component: Setting,
     name: "Setting",
+    permission: [Roles.USER],
+  },
+  {
+    path: "/neighbor/:id/*",
+    exact: true,
+    component: NeighborDetail,
+    name: "Neighbor",
+    permission: [Roles.USER],
+  },
+  {
+    path: "/subject/:id",
+    exact: true,
+    component: SubjectDetail,
+    name: "Subject detail",
     permission: [Roles.USER],
   },
 ];

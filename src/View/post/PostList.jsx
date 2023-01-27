@@ -22,6 +22,7 @@ const PostList = () => {
   const user = useSelector((state) => state.auth.data);
   const tags = useSelector((state) => state.tag.data);
   const [data, setData] = useState([]);
+  const [dataTag, setDataTag] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
   const [image, setImage] = useState("");
 
@@ -39,8 +40,6 @@ const PostList = () => {
     const newPost = {
       image: image,
       user_id: user._id,
-      user_name: user.name,
-      user_avatar: user.avatar,
       content: form.getFieldValue().content ? form.getFieldValue().content : "",
       tags: form.getFieldValue().tags ? form.getFieldValue().tags : "",
     };
@@ -62,10 +61,15 @@ const PostList = () => {
     nextSelectedTags = nextSelectedTags.map((tag) => {
       return tag._id;
     });
-    getAllPostByTag(nextSelectedTags, (res) => {
-      console.log(res);
+    getAllPostByTag(nextSelectedTags, {}, {}, {}, (res) => {
+      if (res.status === 1) {
+        setData(res.data.result);
+      } else {
+        message.error(res.message);
+      }
     });
   };
+
   const createNewPost = () => {
     Modal.confirm({
       width: "1000px",
@@ -104,13 +108,12 @@ const PostList = () => {
       centered: true,
     });
   };
-
   return (
     <div className="container">
       <div className="row-post">
         <div className="post-list">
           {data.map((post, index) => {
-            return <Post post={post} tags={tags} key={index} />;
+            return <Post post={post} tags={tags} key={index} auth={user} />;
           })}
         </div>
 

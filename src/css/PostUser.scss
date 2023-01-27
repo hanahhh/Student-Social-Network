@@ -2,8 +2,29 @@
     object-fit: cover;
     width: calc((100vw - 320px)/3);
     height: calc((100vw - 320px)/3);
+    &:hover {
+        background: var(red);
+        cursor: pointer;
+    }
     @media only screen and (max-width: 768px) {
         width: 32vw;
         height: 32vw;
+    }
+}
+.modal-image {
+    width: 100%;
+    object-fit: cover;
+}
+.modal {
+    width: 95vw !important;
+    max-width: 600px !important;
+}
+
+.tags {
+    display: flex;
+    .tag {
+        margin-right: 5px;
+        cursor: pointer;
+        color: rgb(29, 29, 163);
     }
 }

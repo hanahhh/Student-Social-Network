@@ -1,36 +1,35 @@
-import { message } from "antd";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
+import { useState } from "react";
 import { Route, Routes, useLocation, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { getUserByID } from "../../service/user";
+import "../../css/neighbor.scss";
+import Posts from "../../components/Posts";
+import { educationStatus } from "../../configs/systemStatus";
+import userInfoSearch from "../../configs/userInfoSearch";
 import { getRoute } from "../../configs/getRoute";
-import userService from "../../configs/serviceUser";
-import "../../css/UserDetail.scss";
-import { getUserInfo } from "../../service/user";
 
-const User = () => {
-  const path = `/${useLocation().pathname.split("/")[2]}`;
-  const serviceType = getRoute(userService, path);
-  const [user, setUser] = useState({});
-  const [service, setService] = useState(serviceType);
-  const info = useSelector((state) => state.auth.data);
+const NeighborDetail = () => {
+  const path = `/${useLocation().pathname.split("/")[3]}`;
   const navigate = useNavigate();
-
+  const serviceType = getRoute(userInfoSearch, path);
+  const [service, setService] = useState(serviceType);
+  const user_id = useLocation().pathname.split("/")[2];
+  const [user, setUser] = useState({});
   useEffect(() => {
-    getUserInfo((res) => {
+    getUserByID(user_id, (res) => {
       if (res.status === 1) {
         setUser(res.data.user);
-      } else {
-        message.error("Get user failed.");
       }
     });
-  }, [service, path]);
-
+  }, []);
   const handleChooseService = (index) => {
     setService(index);
-    navigate(`/user${userService[index].to}`);
+    navigate(`/neighbor/${user_id}${userInfoSearch[index].to}`);
   };
+  console.log(user);
   return (
-    <div className="user-detail">
+    <div className="neighbor">
       <div className="user">
         <div className="avatar">
           <img
@@ -43,10 +42,20 @@ const User = () => {
           <p>{user.education}</p>
           <p style={{ fontWeight: "bold" }}>{user.nick_name}</p>
           <p>{user.description}</p>
+          {user.educationStatus === educationStatus.DISABLE && (
+            <div className="private-account">
+              <p>This account is private</p>
+            </div>
+          )}
+          {user.educationStatus !== educationStatus.DISABLE && (
+            <div className="bottom-detail">
+              <p>CPA - {user.cpa}</p>
+            </div>
+          )}
         </div>
       </div>
       <div className="service">
-        {userService.map((serviceItem, index) => {
+        {userInfoSearch.map((serviceItem, index) => {
           return (
             <div
               style={
@@ -70,12 +79,12 @@ const User = () => {
       <div className="bottom-box">
         <div className="content">
           <Routes>
-            {userService.map((route, index) => {
+            {userInfoSearch.map((route, index) => {
               return (
                 <Route
                   path={route.to}
                   exact
-                  element={<route.element user={user} user_id={info._id} />}
+                  element={<route.element user_id={user_id} user={user} />}
                   key={index}
                 />
               );
@@ -87,19 +96,4 @@ const User = () => {
   );
 };
 
-export default User;
-
-/**<div className="post-list">
-          <List
-            grid={{
-              gutter: 16,
-              column: 3,
-            }}
-            dataSource={myPost}
-            renderItem={(item, index) => (
-              <List.Item>
-                <PostUser post={item} key={index} />
-              </List.Item>
-            )}
-          />
-        </div> */
+export default NeighborDetail;

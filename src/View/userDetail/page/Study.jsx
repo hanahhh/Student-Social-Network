@@ -20,14 +20,19 @@ import { useLocation } from "react-router-dom";
 import CreateSemester from "../../../components/CreateSemester";
 import PredictResult from "../../../components/PredictResult";
 import PredictSemester from "../../../components/PredictSemester";
+import SavedPredictResult from "../../../components/SavedPredictResult";
 import { formItemLayout } from "../../../configs/form";
 import { getScoreNum, getScoreResult } from "../../../configs/score";
 import { getScoreStatus } from "../../../configs/subject";
+import { subjectStatus } from "../../../configs/systemStatus";
 import "../../../css/Study.scss";
+import { getPredictResultSemesterByUser } from "../../../service/predictResult";
 import { createSemester, getListSemester } from "../../../service/semester";
 import {
+  deleteSubjectScore,
   getAllSubjectScoreByUserID,
   getAllSubjectScoreSemesterByUser,
+  getCPARecommendation,
   updateSubjectScore,
 } from "../../../service/subjectScore";
 
@@ -38,16 +43,44 @@ const Study = ({ user }) => {
   const path = useLocation().pathname;
   const [formSemester] = Form.useForm();
   const [formUpdateSubject] = Form.useForm();
+  const [formRecommendCPA] = Form.useForm();
   const [data, setData] = useState([]);
   const [semesters, setSemesters] = useState([]);
   const [semester, setSemester] = useState();
   const [semesterData, setSemesterData] = useState([]);
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [predictResult, setPredictResult] = useState([]);
+  const [savedPredictResult, setSavedPredictResult] = useState([]);
+  const [cpaRecommendation, setCpaRecommendation] = useState({});
   const [gpa, setGpa] = useState(0);
 
+  const onFinishDeleteSubjectScore = (id) => {
+    deleteSubjectScore(id, (res) => {
+      if (res.status === 1) {
+        window.location.reload();
+        message.success(res.message);
+      } else {
+        message.error(res.message);
+      }
+    });
+  };
+
   const handleDeleteSubject = (id) => {
-    console.log("delete", id);
+    Modal.confirm({
+      width: "1000px",
+      title: `Delete subject`,
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <>
+          <p>Are you sure to delete this subject ?</p>
+        </>
+      ),
+      onOk() {
+        onFinishDeleteSubjectScore(id);
+      },
+      onCancel() {},
+      centered: true,
+    });
   };
 
   const onFinishUpdateSubjectScore = (id) => {
@@ -75,7 +108,10 @@ const Study = ({ user }) => {
         <>
           <Form
             form={formUpdateSubject}
-            onFinish={onFinishUpdateSubjectScore(id)}
+            onFinish={(e) => {
+              e.preventDefault();
+              onFinishUpdateSubjectScore(id);
+            }}
             layout="vertical"
           >
             <Form.Item label={"Semester"} labelAlign="left" name="semester_id">
@@ -135,16 +171,24 @@ const Study = ({ user }) => {
         message.error(res.message);
       }
     });
-  }, [path]);
+
+    semester &&
+      getPredictResultSemesterByUser(auth._id, semester, (res) => {
+        if (res.status === 1) {
+          setSavedPredictResult(res.data);
+        }
+      });
+  }, [path, semester]);
 
   const handleChange = (values) => {
     setSemester(values);
+    setPredictResult([]);
     getAllSubjectScoreSemesterByUser(auth?._id, values, (res) => {
       if (res.status === 1) {
         let credits = 0;
         let gpa = 0;
         const result = res.data.map((score, index) => {
-          if (score.subject_status !== 2) {
+          if (score.subject_status !== subjectStatus.ONGOING) {
             credits += score.credits;
             gpa += getScoreNum(score.final_score_char) * score.credits;
           }
@@ -170,6 +214,52 @@ const Study = ({ user }) => {
       } else {
         message.error(res.message);
       }
+    });
+  };
+
+  const onFinishRecommendCPA = () => {
+    getCPARecommendation(
+      auth._id,
+      formRecommendCPA.getFieldValue().credits,
+      (res) => {
+        console.log(res);
+        if (res.status === 1) {
+          setCpaRecommendation(res.data.recommendation);
+          message.success(res.message);
+        } else {
+          message.error(res.message);
+        }
+      }
+    );
+  };
+
+  const handleRecommendCPA = () => {
+    formRecommendCPA.resetFields();
+    Modal.confirm({
+      width: "1000px",
+      title: `Improve CPA`,
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <>
+          <Form
+            form={formRecommendCPA}
+            onFinish={onFinishRecommendCPA}
+            layout="vertical"
+          >
+            <Form.Item
+              label="How many credits do you want to take ?"
+              name={"credits"}
+            >
+              <Input style={{ width: "60vw" }} placeholder={"Input credits"} />
+            </Form.Item>
+          </Form>
+        </>
+      ),
+      onOk() {
+        onFinishRecommendCPA();
+      },
+      onCancel() {},
+      centered: true,
     });
   };
 
@@ -374,14 +464,41 @@ const Study = ({ user }) => {
 
   return (
     <div style={{ width: "100%", padding: "10px" }}>
-      <Collapse
-        defaultActiveKey={["0"]}
-        style={{ width: "100%", overflowX: "auto", marginBottom: "20px" }}
-      >
-        <Panel header={`CPA: ${user?.cpa}`} key="1">
-          <Table dataSource={data} columns={columns} />
-        </Panel>
-      </Collapse>
+      <div className="cpa">
+        <Button onClick={handleRecommendCPA}>CPA recommendation</Button>
+        <div className="cpa-recommendation">
+          {Object.keys(cpaRecommendation).length !== 0 && (
+            <div className="title-recommend">
+              <p>CPA recommendation</p>
+            </div>
+          )}
+
+          {Object.keys(cpaRecommendation).length !== 0 && (
+            <div className="recommend">
+              <p>
+                Your CPA will increase:{" "}
+                <span style={{ fontWeight: "bold" }}>
+                  {cpaRecommendation.maxValue}
+                </span>
+              </p>
+              <p>Subjects needed to learn again and got an A:</p>
+              <ul>
+                {cpaRecommendation.subset.map((subject, index) => {
+                  return <li>{subject.subject}</li>;
+                })}
+              </ul>
+            </div>
+          )}
+        </div>
+        <Collapse
+          defaultActiveKey={["0"]}
+          style={{ width: "100%", overflowX: "auto", marginBottom: "20px" }}
+        >
+          <Panel header={`CPA: ${user?.cpa}`} key="1">
+            <Table dataSource={data} columns={columns} />
+          </Panel>
+        </Collapse>
+      </div>
 
       <div className="semester">
         <div className="createSemester">
@@ -408,16 +525,7 @@ const Study = ({ user }) => {
             setPredictResult={setPredictResult}
           />
         </div>
-        <div className="predict-result">
-          {predictResult.length !== 0 && (
-            <p style={{ textDecoration: "underline", fontSize: "18px" }}>
-              Predict result
-            </p>
-          )}
-          {predictResult.map((result, index) => {
-            return <PredictResult key={index} result={result} />;
-          })}
-        </div>
+
         <div className="table">
           <div style={{ width: "fit-content", overflowX: "auto" }}>
             <Table
@@ -426,6 +534,37 @@ const Study = ({ user }) => {
               footer={() => `GPA: ${gpa}`}
             />
           </div>
+        </div>
+        <div className="predict-result">
+          {predictResult.length !== 0 && (
+            <div className="title-predict">
+              <p>Predict result</p>
+            </div>
+          )}
+          {predictResult.map((result, index) => {
+            return (
+              <PredictResult
+                key={index}
+                result={result}
+                user_id={auth._id}
+                semester_id={semester}
+              />
+            );
+          })}
+        </div>
+        <div className="saved-predict-result">
+          {savedPredictResult.length !== 0 && (
+            <div className="title-predict">
+              <p>Saved Predict Result</p>
+            </div>
+          )}
+
+          {savedPredictResult.length !== 0 &&
+            savedPredictResult.map((savedResult, index) => {
+              return (
+                <SavedPredictResult savedResult={savedResult} key={index} />
+              );
+            })}
         </div>
       </div>
     </div>

@@ -23,12 +23,6 @@ const _nav = [
     iconFill: CrownFilled,
   },
   {
-    label: "Service",
-    to: "/service",
-    icon: SlackOutlined,
-    iconFill: SlackCircleFilled,
-  },
-  {
     label: "User",
     to: "/user/post",
     icon: UserOutlined,

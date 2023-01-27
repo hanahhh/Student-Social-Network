@@ -13,12 +13,12 @@
         display: flex;
         justify-content: flex-end;
         button {
-            width: 150px;
-            height: 40px;
+           padding: 5px 10px;
             background: white;
             border: 1px solid black;
             border-radius: 10px;
             cursor: pointer;
         }
     }
+    
 }

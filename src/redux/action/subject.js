@@ -15,3 +15,18 @@ export const getAllSubjects = createAsyncThunk(`subjects/all`, async () => {
     }
   }
 });
+
+export const getTopSubject = createAsyncThunk(`subjects/top`, async () => {
+  try {
+    const axios = AxiosConfig();
+    let api = "/subject/top";
+    const res = await axios.get(api);
+    return res.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      return error.response.data;
+    } else {
+      return error.message;
+    }
+  }
+});

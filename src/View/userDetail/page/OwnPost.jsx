@@ -1,15 +1,13 @@
+import { List, message } from "antd";
 import React, { useEffect, useState } from "react";
 import PostUser from "../../../components/PostUser";
-import { List, message } from "antd";
 import { getMyPost } from "../../../service/post";
-import { useSelector } from "react-redux";
 
-const Post = () => {
+const OwnPost = () => {
   const [myPost, setMyPost] = useState([]);
-  const info = useSelector((state) => state.auth.data);
 
   useEffect(() => {
-    getMyPost(info._id, {}, {}, {}, (res) => {
+    getMyPost({}, {}, {}, (res) => {
       if (res.status === 1) {
         setMyPost(res.data.result);
       } else {
@@ -35,4 +33,4 @@ const Post = () => {
   );
 };
 
-export default Post;
+export default OwnPost;
