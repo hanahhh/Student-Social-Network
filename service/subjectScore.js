@@ -1,5 +1,9 @@
 import CONFIG_STATUS from "../config/status.json";
-import { getSubjectScoreFinal } from "../config/subjectScore.js";
+import {
+  getScoreNum,
+  getSubjectScoreFinal,
+  roundNumber,
+} from "../config/subjectScore.js";
 import { subjectStatus } from "../config/systemStatus.js";
 import {
   recommendCPAScore,
@@ -8,7 +12,11 @@ import {
 import Semester from "../models/Semester.js";
 import Subject from "../models/Subject.js";
 import SubjectScore from "../models/SubjectScore.js";
-import { getSubjectByID } from "./subject.js";
+import {
+  getSubjectAverage,
+  getSubjectByID,
+  updateSubjectByID,
+} from "./subject.js";
 
 export const checkExistSubjectScore = async (subjectScore_id) => {
   let isExist = Boolean;
@@ -94,32 +102,57 @@ export const getGPAScoreRecommendation = async (user_id, semester_id, gpa) => {
     user_id,
     semester_id
   );
+  let credits = 0;
+  let mutableCredits = 0;
+  let immutableSubject = 0;
   let creditsList = [];
   const subjectPredictedList = [];
   for (let i = 0; i < subjectScoreList.length; i++) {
+    credits += subjectScoreList[i].credits;
     if (subjectScoreList[i].subject_status == subjectStatus.ONGOING) {
+      mutableCredits += subjectScoreList[i].credits;
       creditsList.push(subjectScoreList[i].credits);
       subjectPredictedList.push(subjectScoreList[i]);
+    } else {
+      immutableSubject +=
+        subjectScoreList[i].credits *
+        getScoreNum(subjectScoreList[i].final_score_char);
     }
   }
 
-  const result = recommendGPAScore(gpa, creditsList, subjectScoreList);
+  const newGPAPredict =
+    ((gpa - immutableSubject / credits) * credits) / mutableCredits;
+  const immutableGPA = immutableSubject / credits;
+
+  const result = recommendGPAScore(
+    newGPAPredict,
+    creditsList,
+    subjectPredictedList,
+    immutableGPA,
+    mutableCredits,
+    credits
+  );
   return result;
 };
 
 export const getCPAScoreRecommendation = async (user_id, credits) => {
   const subjectScoreList = await getAllSubjectScoreByUser(user_id);
-  const subjectList = subjectScoreList.map((score) => {
-    if (score.subject_status !== subjectStatus.ONGOING)
-      return { w: score.credits, v: score.final_score };
-  });
+
+  let subjectList = [];
+  for (let i = 0; i < subjectScoreList.length; i++) {
+    if (subjectScoreList[i].subject_status !== subjectStatus.ONGOING)
+      subjectList.push({
+        w: subjectScoreList[i].credits,
+        v: getScoreNum(subjectScoreList[i].final_score_char),
+      });
+  }
   let result = recommendCPAScore(subjectList, credits);
   const maxValue = result.maxValue;
   result = result.subset.map((sub) => {
     return subjectScoreList[sub.id];
   });
   return {
-    maxValue: maxValue,
+    maxValue: roundNumber(maxValue),
     subset: result,
   };
 };
@@ -220,6 +253,7 @@ export const updateSubjectScoreByID = async (form, subjectScore_id) => {
         new: true,
       }
     );
+
     return {
       status: CONFIG_STATUS.SUCCESS,
       message: "Update subject score successful",

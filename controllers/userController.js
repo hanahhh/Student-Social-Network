@@ -20,21 +20,38 @@ export const getUserByIDController = async (req, res) => {
   const { user_id } = req.params;
   const isExist = await checkExistUser(user_id);
   if (isExist) {
-    let user = await getUserByID(user_id);
-    const newUser = user.user;
-    if (newUser.educationStatus == educationStatus.DISABLE) {
-      user = {
-        name: newUser.name,
-        email: newUser.email,
-        avatar: newUser.avatar,
-        educationStatus: newUser.educationStatus,
-        description: newUser.description,
-        education: newUser.education,
-        nick_name: newUser.nick_name,
-        website: newUser.website,
-      };
-    }
-    dataHandle(user, req, res);
+    const user = await getUserByID(user_id);
+    const tmp = user.user;
+    if (tmp.educationStatus == educationStatus.DISABLE) {
+      // user = {
+      //   _id: tmp._id,
+      //   name: tmp.name,
+      //   email: tmp.email,
+      //   avatar: tmp.avatar,
+      //   educationStatus: tmp.educationStatus,
+      //   description: tmp?.description,
+      //   education: tmp?.education,
+      //   nick_name: tmp?.nick_name,
+      //   website: tmp?.website,
+      // };
+      dataHandle(
+        {
+          user: {
+            _id: tmp._id,
+            name: tmp.name,
+            email: tmp.email,
+            avatar: tmp.avatar,
+            educationStatus: tmp.educationStatus,
+            description: tmp?.description,
+            education: tmp?.education,
+            nick_name: tmp?.nick_name,
+            website: tmp?.website,
+          },
+        },
+        req,
+        res
+      );
+    } else dataHandle(user, req, res);
   } else {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,

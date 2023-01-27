@@ -7,6 +7,7 @@ import {
   getAllPostByTagIDController,
   getAllPostByUserIDController,
   getAllPostController,
+  getOwnPostController,
   getPostByIDController,
   updatePostByIdController,
   uploadPostImageController,
@@ -34,6 +35,7 @@ router.post(
   TryCatch(uploadPostImageControllerByID)
 );
 
+router.get("/own", requireLogin, TryCatch(getOwnPostController));
 router.get("/detail/:post_id", requireLogin, TryCatch(getPostByIDController));
 router.get(
   "/user/:user_id",

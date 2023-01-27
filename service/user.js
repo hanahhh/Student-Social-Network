@@ -106,7 +106,7 @@ export const updateUserByID = async (form, user_id) => {
 export const getUserByID = async (user_id) => {
   const user = await User.findOne(
     { _id: user_id },
-    "name nick_name email avatar description education website educationStatus role cpa credits"
+    "_id name nick_name email avatar description education website educationStatus role cpa credits"
   );
 
   return {
@@ -117,7 +117,7 @@ export const getUserByID = async (user_id) => {
 export const getUserInfo = async (user_id) => {
   const user = await User.findById(
     user_id,
-    "name nick_name email avatar description education website educationStatus role cpa credits"
+    "_id name nick_name email avatar description education website educationStatus role cpa credits"
   );
   return {
     user,

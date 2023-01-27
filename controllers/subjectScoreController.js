@@ -2,7 +2,7 @@ import CONFIG_STATUS from "../config/status.json";
 import { getSubjectScoreFinal } from "../config/subjectScore.js";
 import { dataHandle } from "../middlewares/dataHandle.js";
 import { checkExistSemester } from "../service/semester.js";
-import { checkExistSubject } from "../service/subject.js";
+import { checkExistSubject, getSubjectAverage } from "../service/subject.js";
 import {
   checkExistSubjectScore,
   createSubjectScore,
@@ -16,6 +16,7 @@ import {
   updateSubjectScoreByID,
 } from "../service/subjectScore.js";
 import { checkExistUser, updateUserCPA } from "../service/user.js";
+import { updateSubjectByID } from "../service/subject.js";
 
 export const getAllSubjectScoreController = async (req, res) => {
   const subjectScore_list = await getAllSubjectScore();
@@ -176,6 +177,13 @@ export const updateSubjectScoreByIdController = async (req, res) => {
   };
 
   const result = await updateSubjectScoreByID(updates, subjectScore_id);
+  const subject_id = result.result.update_result.subject_id;
+  //update average score
+  const average = await getSubjectAverage(subject_id);
+  const ip = await updateSubjectByID(
+    { average_score: average[0]?.average_score },
+    subject_id
+  );
   await updateUserCPA(user_id);
   if (result.status == 0) {
     res.status(500).send({

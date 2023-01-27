@@ -56,11 +56,40 @@ export const createSubject = async ({
   }
 };
 
+export const getSubjectAverage = async (_id) => {
+  let subject_id = _id;
+  if (typeof _id !== "string") {
+    subject_id = _id.toHexString();
+  }
+  const average = await SubjectScore.aggregate(
+    [
+      // match condition to match for specific
+      {
+        $match: {
+          subject_id: { $eq: subject_id },
+          subject_status: { $in: [subjectStatus.PASSED, subjectStatus.FAILED] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          average_score: { $avg: "$final_score" },
+        },
+      },
+    ],
+    { allowDiskUse: true }
+  );
+
+  return average;
+};
+
 export const getSubjectByID = async (subject_id) => {
   const subject = await Subject.findOne(
     { _id: subject_id },
     "school_id department_id category_id name code credits ratio average_score review"
   );
+
+  const average = await getSubjectAverage(subject_id);
   const school_detail = await School.findOne({ id: subject.school_id });
   const department_detail = await Department.findOne({
     id: subject.department_id,
@@ -74,6 +103,7 @@ export const getSubjectByID = async (subject_id) => {
     subject_id: subject._id,
     subject_status: subjectStatus.PASSED,
   });
+
   const subject_detail = {
     _id: subject._id,
     school: school_detail.name,
@@ -85,9 +115,11 @@ export const getSubjectByID = async (subject_id) => {
     ratio: subject.ratio,
     student_amount: student_amount,
     student_passed_amount: student_passed_amount,
-    average_score: subject.average_score,
+    average_score: average[0]?.average_score,
     review: subject.review,
   };
+  await updateSubjectByID(subject_detail, subject_id);
+
   return {
     subject_detail,
   };
@@ -117,6 +149,13 @@ export const updateSubjectByID = async (form, subject_id) => {
 
 export const deleteSubject = async (subject_id) => {
   const result = await Subject.findByIdAndDelete(subject_id);
+  return {
+    result,
+  };
+};
+
+export const getTopSubject = async () => {
+  const result = await Subject.find().sort({ average_score: -1 }).limit(5);
   return {
     result,
   };

@@ -56,7 +56,6 @@ router.put(
 router.delete(
   "/:subjectScore_id",
   requireLogin,
-  requireRole(["ADMIN"]),
   TryCatch(deleteSubjectScoreController)
 );
 

@@ -1,6 +1,13 @@
-import { roundNumber } from "../config/subjectScore.js";
+import { getScoreNum, roundNumber } from "../config/subjectScore.js";
 
-export const recommendGPAScore = (M, b, subjectList) => {
+export const recommendGPAScore = (
+  M,
+  b,
+  subjectList,
+  immutableGPA,
+  mutableCredits,
+  credits
+) => {
   const scores = [1, 1.5, 2, 2.5, 3, 3.5, 4];
   const scoreA = ["D", "D+", "C", "C+", "B", "B+", "A"];
   let result = [];
@@ -18,7 +25,10 @@ export const recommendGPAScore = (M, b, subjectList) => {
         subject: subjectList[index].subject,
       };
     });
-    result.push({ subjectList: subjects.slice(), score: roundNumber(T) });
+    result.push({
+      subjectList: subjects.slice(),
+      score: roundNumber((T * mutableCredits) / credits + immutableGPA),
+    });
   };
 
   const check = (v, k) => {
@@ -52,6 +62,7 @@ export const recommendGPAScore = (M, b, subjectList) => {
 };
 
 export const recommendCPAScore = (items, capacity) => {
+  console.log(items, capacity);
   let sum = 0;
   items.forEach((item) => {
     sum += item.w;

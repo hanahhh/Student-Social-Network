@@ -1,5 +1,7 @@
 import CONFIG_STATUS from "../config/status.json";
+import { educationStatus } from "../config/systemStatus.js";
 import Post from "../models/Post.js";
+import { getUserByID } from "./user.js";
 
 export const checkExistPost = async (post_id) => {
   let isExist = Boolean;
@@ -12,14 +14,41 @@ export const checkExistPost = async (post_id) => {
   return { isExist };
 };
 
+export const checkExistPostUser = async (post_id, user_id) => {
+  let isExist = Boolean;
+  const checkExist = await Post.exists({ _id: post_id, user_id: user_id });
+  if (!checkExist) {
+    isExist = false;
+  } else {
+    isExist = true;
+  }
+  return { isExist };
+};
+
 export const getAllPost = async () => {
-  let result = await Post.find();
+  let result = await Post.find().sort("-created_at");
+  result = result.map((item, index) => {
+    console.log(item.created_at);
+    return {
+      _id: item._id,
+      user_id: item.user_id,
+      content: item.content,
+      image: item.image ? item.image.replaceAll("\\", "/") : item.image,
+      tags: item.tags,
+    };
+  });
+  return {
+    result,
+  };
+};
+
+export const getOwnPost = async (user_id) => {
+  let result = await Post.find({ user_id }, "_id content image tags").sort(
+    "-created_at"
+  );
   result = result.map((item, index) => {
     return {
       _id: item._id,
-      user_name: item.user_name,
-      user_avatar: item.user_avatar,
-      user_id: item.user_id,
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
       tags: item.tags,
@@ -33,14 +62,16 @@ export const getAllPost = async () => {
 export const getAllPostByUserID = async (user_id) => {
   let result = await Post.find(
     { user_id },
-    "_id user_id user_name user_avatar content image tags"
-  );
+    "_id user_id content image tags"
+  ).sort("-created_at");
+  const user = await getUserByID(user_id);
+  if (user.user.educationStatus === educationStatus.DISABLE) {
+    return [];
+  }
   result = result.map((item, index) => {
     return {
       _id: item._id,
       user_id: item.user_id,
-      user_name: item.user_name,
-      user_avatar: item.user_avatar,
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
       tags: item.tags,
@@ -51,17 +82,15 @@ export const getAllPostByUserID = async (user_id) => {
   };
 };
 
-export const getAllPostByTagID = async (tag_id) => {
+export const getAllPostByTagID = async (tagList) => {
   let result = await Post.find(
-    { tag_id },
-    "_id user_id user_name user_avatar content image tags"
-  );
+    { tags: tagList },
+    "_id user_id content image tags"
+  ).sort("-created_at");
   result = result.map((item, index) => {
     return {
       _id: item._id,
       user_id: item.user_id,
-      user_name: item.user_name,
-      user_avatar: item.user_avatar,
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
       tags: item.tags,
@@ -72,21 +101,12 @@ export const getAllPostByTagID = async (tag_id) => {
   };
 };
 
-export const createPost = async ({
-  user_id,
-  content,
-  image,
-  tags,
-  user_name,
-  user_avatar,
-}) => {
+export const createPost = async ({ user_id, content, image, tags }) => {
   await Post.create({
     user_id,
     content,
     tags,
     image,
-    user_avatar,
-    user_name,
   });
   return {
     status: CONFIG_STATUS.SUCCESS,

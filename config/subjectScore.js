@@ -1,3 +1,5 @@
+import { subjectStatus } from "./systemStatus.js";
+
 export const getScoreChar = (score) => {
   if (score >= 9) {
     return "A+";
@@ -59,7 +61,7 @@ export const getSubjectScoreFinal = (midterm_score, endterm_score, credits) => {
       final_score: 0,
       final_score_char: 0,
       final_score_char: 0,
-      subject_status: getSubjectScoreStatus(getScoreChar(final_score)),
+      subject_status: subjectStatus.ONGOING,
     };
   }
 };

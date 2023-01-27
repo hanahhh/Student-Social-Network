@@ -7,6 +7,7 @@ import {
   deleteSubject,
   getAllSubject,
   getSubjectByID,
+  getTopSubject,
   updateSubjectByID,
 } from "../service/subject.js";
 import { checkExistSchool } from "../service/school.js";
@@ -146,4 +147,9 @@ export const deleteSubjectController = async (req, res) => {
       message: "Subject is not exist.",
     });
   }
+};
+
+export const getTopSubjectController = async (req, res) => {
+  const subject_list = await getTopSubject();
+  dataHandle(subject_list, req, res);
 };

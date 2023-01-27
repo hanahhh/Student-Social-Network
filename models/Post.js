@@ -7,14 +7,6 @@ const PostSchema = new mongoose.Schema({
     required: true,
     ref: "User",
   },
-  user_name: {
-    type: String,
-    required: true,
-  },
-  user_avatar: {
-    type: String,
-    required: true,
-  },
   content: {
     type: String,
     default: "",

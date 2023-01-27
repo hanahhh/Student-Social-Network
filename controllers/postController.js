@@ -3,39 +3,28 @@ import { deleteOldImagePostListener } from "../listener/imageListener.js";
 import { dataHandle } from "../middlewares/dataHandle.js";
 import {
   checkExistPost,
+  checkExistPostUser,
   createPost,
   deletePost,
   getAllPost,
   getAllPostByTagID,
   getAllPostByUserID,
+  getOwnPost,
   getPostByID,
   updatePostByID,
 } from "../service/post.js";
 import { checkExistTag, getTagByID, updateTagByID } from "../service/tag.js";
-import { checkExistUser } from "../service/user.js";
+import { checkExistUser, getUserByID } from "../service/user.js";
+import { verifyToken } from "../utils/security.js";
 
 export const getAllPostController = async (req, res) => {
   let post_list = await getAllPost();
-  const list = post_list.result;
-  for (let i = 0; i < list.length; i++) {
-    let tags = list[i].tags;
-    tags.forEach((tag) => {
-      return getTagByID(tag);
-    });
-  }
-
   dataHandle(post_list, req, res);
 };
 
 export const createPostController = async (req, res, next) => {
   const { user_id, content, tags, image, user_avatar, user_name } = req.body;
-  if (
-    user_id == null ||
-    content == null ||
-    image == null ||
-    user_avatar == null ||
-    user_name == null
-  ) {
+  if (user_id == null || content == null || image == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
       message: "Request body is invalid. Please try again.",
@@ -133,11 +122,29 @@ export const uploadPostImageControllerByID = async (req, res) => {
   }
 };
 
+export const getOwnPostController = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = verifyToken(token);
+  const user_id = decodedToken.data._id;
+  const post_list = await getOwnPost(user_id);
+  dataHandle(post_list, req, res);
+};
+
 export const getPostByIDController = async (req, res) => {
   const { post_id } = req.params;
   const { isExist } = await checkExistPost(post_id);
   if (isExist) {
     const post = await getPostByID(post_id);
+    const user = await getUserByID(post.post_detail.user_id);
+    const returnPost = {
+      ...post,
+      post_detail: {
+        ...post.post_detail,
+        user_avatar: user.user.avatar,
+        user_name: user.user.name,
+      },
+    };
+    console.log(returnPost);
     dataHandle(post, req, res);
   } else {
     res.status(400).send({
@@ -163,20 +170,20 @@ export const getAllPostByUserIDController = async (req, res) => {
 
 export const getAllPostByTagIDController = async (req, res) => {
   const tagList = req.body;
-  let postList = [];
-  for (let i = 0; i < tagList.length; i++) {
-    const { isExist } = await checkExistTag(tagList[i]);
-    if (isExist) {
-      const post = await getAllPostByTagID(tagList[i]);
-      postList = postList.concat(post.result);
-    } else {
-      res.status(400).send({
-        status: CONFIG_STATUS.FAIL,
-        message: "Some tag is not exist.",
-      });
-    }
-  }
-  dataHandle(postList, req, res);
+  // let postList = [];
+  // for (let i = 0; i < tagList.length; i++) {
+  //   const { isExist } = await checkExistTag(tagList[i]);
+  //   if (isExist) {
+  const post = await getAllPostByTagID(tagList);
+  //postList = postList.concat(post.result);
+  //   } else {
+  //     res.status(400).send({
+  //       status: CONFIG_STATUS.FAIL,
+  //       message: "Some tag is not exist.",
+  //     });
+  //   }
+  // }
+  dataHandle(post, req, res);
 };
 
 export const updatePostByIdController = async (req, res) => {
@@ -208,7 +215,8 @@ export const updatePostByIdController = async (req, res) => {
 
 export const deletePostController = async (req, res) => {
   const { post_id } = req.params;
-  const { isExist } = await checkExistPost(post_id);
+  const { user_id } = req.body;
+  const { isExist } = await checkExistPostUser(post_id, user_id);
   if (isExist) {
     const post = await deletePost(post_id);
     res.send({
@@ -218,7 +226,7 @@ export const deletePostController = async (req, res) => {
   } else {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
-      message: "Post is not exist.",
+      message: "You are not granted to delete this post.",
     });
   }
 };

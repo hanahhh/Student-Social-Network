@@ -7,6 +7,7 @@ import {
   deleteSubjectController,
   getAllSubjectController,
   getSubjectByIDController,
+  getTopSubjectController,
   updateSubjectByIdController,
 } from "../controllers/subjectController.js";
 
@@ -38,5 +39,7 @@ router.delete(
   requireRole(["ADMIN"]),
   TryCatch(deleteSubjectController)
 );
+
+router.get("/top", requireLogin, TryCatch(getTopSubjectController));
 
 export default router;
