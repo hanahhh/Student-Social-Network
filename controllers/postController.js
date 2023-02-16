@@ -23,8 +23,11 @@ export const getAllPostController = async (req, res) => {
 };
 
 export const createPostController = async (req, res, next) => {
-  const { user_id, content, tags, image, user_avatar, user_name } = req.body;
-  if (user_id == null || content == null || image == null) {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = verifyToken(token);
+  const user_id = decodedToken.data._id;
+  const { content, tags, image, user_avatar, user_name } = req.body;
+  if (content == null || image == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
       message: "Request body is invalid. Please try again.",
@@ -54,7 +57,7 @@ export const createPostController = async (req, res, next) => {
         );
       }
     }
-    const result = await createPost(req.body);
+    const result = await createPost(req.body, user_id);
     if (result.status != 0) {
       res.status(200).send({
         ...result,
@@ -188,19 +191,21 @@ export const getAllPostByTagIDController = async (req, res) => {
 
 export const updatePostByIdController = async (req, res) => {
   const { post_id } = req.params;
-  const { user_id, content, image, tags } = req.body;
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = verifyToken(token);
+  const user_id = decodedToken.data._id;
 
   if (user_id == null) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
-      message: "Request body is invalid.",
+      message: "User is not exist.",
     });
   } else {
     let updates = {
       ...req.body,
       updated_at: Date.now(),
     };
-    const result = await updatePostByID(updates, post_id);
+    const result = await updatePostByID(updates, post_id, user_id);
     if (result.status == 0) {
       res.status(500).send({
         ...result,
@@ -214,8 +219,10 @@ export const updatePostByIdController = async (req, res) => {
 };
 
 export const deletePostController = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = verifyToken(token);
+  const user_id = decodedToken.data._id;
   const { post_id } = req.params;
-  const { user_id } = req.body;
   const { isExist } = await checkExistPostUser(post_id, user_id);
   if (isExist) {
     const post = await deletePost(post_id);

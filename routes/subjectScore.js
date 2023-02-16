@@ -2,6 +2,7 @@ import express from "express";
 import {
   createSubjectScoreController,
   deleteSubjectScoreController,
+  getAllMySubjectScoreController,
   getAllSubjectScoreByUserController,
   getAllSubjectScoreController,
   getAllSubjectScoreSemesterByUserController,
@@ -24,6 +25,13 @@ router.get(
   requireLogin,
   TryCatch(getAllSubjectScoreByUserController)
 );
+
+router.get(
+  "/my-subject",
+  requireLogin,
+  TryCatch(getAllMySubjectScoreController)
+);
+
 router.get(
   "/semesters",
   requireLogin,

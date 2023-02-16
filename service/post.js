@@ -35,6 +35,7 @@ export const getAllPost = async () => {
       content: item.content,
       image: item.image ? item.image.replaceAll("\\", "/") : item.image,
       tags: item.tags,
+      created_at: item.created_at,
     };
   });
   return {
@@ -84,7 +85,7 @@ export const getAllPostByUserID = async (user_id) => {
 
 export const getAllPostByTagID = async (tagList) => {
   let result = await Post.find(
-    { tags: tagList },
+    { tags: { $in: tagList } },
     "_id user_id content image tags"
   ).sort("-created_at");
   result = result.map((item, index) => {
@@ -101,7 +102,7 @@ export const getAllPostByTagID = async (tagList) => {
   };
 };
 
-export const createPost = async ({ user_id, content, image, tags }) => {
+export const createPost = async ({ content, image, tags }, user_id) => {
   await Post.create({
     user_id,
     content,
@@ -131,8 +132,8 @@ export const getPostByID = async (post_id) => {
   };
 };
 
-export const updatePostByID = async (form, post_id) => {
-  const checkExist = await Post.exists({ _id: post_id });
+export const updatePostByID = async (form, post_id, user_id) => {
+  const checkExist = await Post.exists({ _id: post_id, user_id: user_id });
   if (checkExist) {
     const update_result = await Post.findByIdAndUpdate(post_id, form, {
       new: true,
@@ -153,7 +154,8 @@ export const updatePostByID = async (form, post_id) => {
   } else {
     return {
       status: CONFIG_STATUS.FAIL,
-      message: "Update post failed, post id is not exist. Please try again",
+      message:
+        "Update post failed, post id is not exist or you are not granted. Please try again",
     };
   }
 };

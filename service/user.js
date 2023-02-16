@@ -65,7 +65,7 @@ export const updateUserCPA = async (user_id) => {
       }
     });
     const updates = {
-      cpa: roundNumber(cpa / credits),
+      cpa: roundNumber(cpa / credits) ? roundNumber(cpa / credits) : 0,
       credits: credits,
     };
     const result = await updateUserByID(updates, user_id);
@@ -88,6 +88,8 @@ export const updateUserByID = async (form, user_id) => {
       status: CONFIG_STATUS.SUCCESS,
       message: "Update user successful",
       result: {
+        name: update_result.name,
+        school_id: update_result.school_id,
         refresh_token: update_result.refresh_token,
         _id: update_result._id,
         email: update_result.email,
@@ -106,7 +108,7 @@ export const updateUserByID = async (form, user_id) => {
 export const getUserByID = async (user_id) => {
   const user = await User.findOne(
     { _id: user_id },
-    "_id name nick_name email avatar description education website educationStatus role cpa credits"
+    "_id name nick_name email avatar description education website educationStatus role cpa credits school_id"
   );
 
   return {
@@ -117,7 +119,7 @@ export const getUserByID = async (user_id) => {
 export const getUserInfo = async (user_id) => {
   const user = await User.findById(
     user_id,
-    "_id name nick_name email avatar description education website educationStatus role cpa credits"
+    "_id name nick_name email avatar description education website educationStatus role cpa credits school_id"
   );
   return {
     user,

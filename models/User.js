@@ -17,6 +17,9 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  school_id: {
+    type: String,
+  },
   avatar: {
     type: String,
     default:

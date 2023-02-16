@@ -12,6 +12,7 @@ import {
 } from "../service/subject.js";
 import { checkExistSchool } from "../service/school.js";
 import { checkExistDepartment } from "../service/department.js";
+import { checkExistUser, getUserByID } from "../service/user.js";
 
 export const getAllSubjectController = async (req, res) => {
   const subject_list = await getAllSubject();
@@ -19,11 +20,23 @@ export const getAllSubjectController = async (req, res) => {
 };
 
 export const createSubjectController = async (req, res, next) => {
-  const { school_id, department_id, category_id, name, code, credits, ratio } =
-    req.body;
+  const {
+    school_id,
+    department_id,
+    category_id,
+    name,
+    code,
+    credits,
+    ratio,
+    user_id,
+  } = req.body;
   if (
     (school_id == null || department_id == null,
-    name == null || code == null || credits == null || ratio == null)
+    name == null ||
+      code == null ||
+      credits == null ||
+      ratio == null ||
+      user_id == null)
   ) {
     res.status(400).send({
       status: CONFIG_STATUS.FAIL,
@@ -32,6 +45,7 @@ export const createSubjectController = async (req, res, next) => {
   } else {
     const checkSchool = await checkExistSchool(school_id);
     const checkDepartment = await checkExistDepartment(department_id);
+    const checkUser = await checkExistUser(user_id);
     if (!checkSchool.isExist) {
       res.status(400).send({
         status: CONFIG_STATUS.FAIL,
@@ -42,16 +56,29 @@ export const createSubjectController = async (req, res, next) => {
         status: CONFIG_STATUS.FAIL,
         message: "Department is not exist.",
       });
+    } else if (!checkUser.isExist) {
+      res.status(400).send({
+        status: CONFIG_STATUS.FAIL,
+        message: "User is not exist.",
+      });
     } else {
-      const result = await createSubject(req.body);
-      if (result.status != 0) {
-        res.status(200).send({
-          ...result,
+      const user = await getUserByID(user_id);
+      if (user.user.school_id != school_id) {
+        res.status(400).send({
+          status: CONFIG_STATUS.FAIL,
+          message: "Permission denied. You must be a student of this school !",
         });
       } else {
-        res.status(500).send({
-          ...result,
-        });
+        const result = await createSubject(req.body);
+        if (result.status != 0) {
+          res.status(200).send({
+            ...result,
+          });
+        } else {
+          res.status(500).send({
+            ...result,
+          });
+        }
       }
     }
   }

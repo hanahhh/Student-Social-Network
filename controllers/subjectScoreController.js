@@ -15,8 +15,10 @@ import {
   getSubjectScoreByID,
   updateSubjectScoreByID,
 } from "../service/subjectScore.js";
-import { checkExistUser, updateUserCPA } from "../service/user.js";
+import { checkExistUser, getUserByID, updateUserCPA } from "../service/user.js";
 import { updateSubjectByID } from "../service/subject.js";
+import { verifyToken } from "../utils/security.js";
+import { educationStatus } from "../config/systemStatus.js";
 
 export const getAllSubjectScoreController = async (req, res) => {
   const subjectScore_list = await getAllSubjectScore();
@@ -51,7 +53,7 @@ export const createSubjectScoreController = async (req, res, next) => {
       });
     } else {
       const result = await createSubjectScore(req.body);
-
+      await updateUserCPA(user_id);
       if (result.status != 0) {
         res.status(200).send({
           ...result,
@@ -67,6 +69,31 @@ export const createSubjectScoreController = async (req, res, next) => {
 
 export const getAllSubjectScoreByUserController = async (req, res) => {
   const { user_id } = req.params;
+  const isExist = await checkExistUser(user_id);
+  if (isExist) {
+    const user = await getUserByID(user_id);
+    if (user.user.educationStatus === educationStatus.ENABLE) {
+      const subjectScoreList = await getAllSubjectScoreByUser(user_id);
+
+      dataHandle(subjectScoreList, req, res);
+    } else {
+      res.status(400).send({
+        status: CONFIG_STATUS.FAIL,
+        message: "Permission denied.",
+      });
+    }
+  } else {
+    res.status(400).send({
+      status: CONFIG_STATUS.FAIL,
+      message: "User is not exist.",
+    });
+  }
+};
+
+export const getAllMySubjectScoreController = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const decodedToken = verifyToken(token);
+  const user_id = decodedToken.data._id;
   const isExist = await checkExistUser(user_id);
   if (isExist) {
     const subjectScoreList = await getAllSubjectScoreByUser(user_id);

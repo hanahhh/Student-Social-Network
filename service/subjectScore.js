@@ -189,6 +189,7 @@ export const createSubjectScore = async (req) => {
       ...req,
       final_score: score.final_score,
       final_score_char: score.final_score_char,
+      subject_status: score.subject_status,
     });
     return {
       status: CONFIG_STATUS.SUCCESS,
