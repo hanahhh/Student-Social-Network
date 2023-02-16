@@ -26,9 +26,9 @@ const beforeUpload = (file) => {
   return isJpgOrPng && isLt2M;
 };
 
-const UploadImage = ({ imageUrl, setImageUrl }) => {
-  useEffect(() => {}, [imageUrl]);
-
+const UploadImage = ({ form }) => {
+  const imageUrl = form.getFieldValue().image;
+  useEffect(() => {}, [form]);
   const [loading, setLoading] = useState(false);
   const handleChange = (info) => {
     if (info.file.status === "uploading") {
@@ -65,7 +65,9 @@ const UploadImage = ({ imageUrl, setImageUrl }) => {
     uploadImagePost(formData, (res) => {
       if (res.status === 1) {
         setLoading(false);
-        setImageUrl(res.data.path);
+        form.setFieldsValue({
+          image: res.data.path,
+        });
       } else {
         message.error("Upload image failed !");
       }

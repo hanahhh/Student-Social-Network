@@ -16,7 +16,7 @@ const OwnPost = () => {
     });
   }, []);
   return (
-    <div className="post-list">
+    <div style={{ width: "100%" }}>
       <List
         grid={{
           gutter: 16,

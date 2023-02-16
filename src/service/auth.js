@@ -49,6 +49,9 @@ export function getAllowedNav(navigation, role) {
 }
 
 export function getToken(callback) {
+  console.log(
+    localStorage.getItem(`${process.env.REACT_APP_PREFIX_LOCAL}_refresh_token`)
+  );
   axios
     .post(`${process.env.REACT_APP_API}/token/refresh`, {
       refresh_token: localStorage.getItem(

@@ -1,11 +1,10 @@
 import {
-  CrownOutlined,
   CrownFilled,
-  HomeOutlined,
+  CrownOutlined,
   HomeFilled,
-  SlackOutlined,
-  SlackCircleFilled,
-  UserOutlined,
+  HomeOutlined,
+  SmileFilled,
+  SmileOutlined,
   SplitCellsOutlined,
 } from "@ant-design/icons";
 
@@ -25,8 +24,8 @@ const _nav = [
   {
     label: "User",
     to: "/user/post",
-    icon: UserOutlined,
-    iconFill: UserOutlined,
+    icon: SmileOutlined,
+    iconFill: SmileFilled,
   },
   {
     label: "Logout",

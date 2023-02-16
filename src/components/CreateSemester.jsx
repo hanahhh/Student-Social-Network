@@ -47,7 +47,6 @@ const CreateSemester = ({ semesters, user }) => {
           message.error(res.message);
         }
       });
-      console.log(newSubject);
     });
   };
   const handleCreateSemester = () => {
@@ -75,7 +74,7 @@ const CreateSemester = ({ semesters, user }) => {
               ]}
             >
               <Select
-                style={{ width: "60vw" }}
+                style={{ minWidth: "700px", width: "100%" }}
                 placeholder={"Choose semester"}
                 options={semesters}
               />
@@ -106,7 +105,7 @@ const CreateSemester = ({ semesters, user }) => {
                         ]}
                       >
                         <Select
-                          style={{ width: "60vw" }}
+                          style={{ minWidth: "700px", width: "100%" }}
                           placeholder={"Choose subject"}
                           options={subjects}
                         />
@@ -117,7 +116,7 @@ const CreateSemester = ({ semesters, user }) => {
                         name={[name, "midterm_score"]}
                       >
                         <Input
-                          style={{ width: "60vw" }}
+                          style={{ minWidth: "700px", width: "100%" }}
                           placeholder={"Midterm score"}
                         />
                       </Form.Item>
@@ -127,7 +126,7 @@ const CreateSemester = ({ semesters, user }) => {
                         name={[name, "endterm_score"]}
                       >
                         <Input
-                          style={{ width: "60vw" }}
+                          style={{ minWidth: "700px", width: "100%" }}
                           placeholder={"Endterm score"}
                         />
                       </Form.Item>
@@ -135,12 +134,6 @@ const CreateSemester = ({ semesters, user }) => {
                         label="Subject status"
                         {...restField}
                         name={[name, "subject_status"]}
-                        rules={[
-                          {
-                            required: true,
-                            message: "This field is required !",
-                          },
-                        ]}
                       >
                         <Radio.Group options={subject_status_option} />
                       </Form.Item>
@@ -150,7 +143,7 @@ const CreateSemester = ({ semesters, user }) => {
                         name={[name, "schedule"]}
                       >
                         <Input
-                          style={{ width: "60vw" }}
+                          style={{ minWidth: "700px", width: "100%" }}
                           placeholder={"Input schedule"}
                         />
                       </Form.Item>

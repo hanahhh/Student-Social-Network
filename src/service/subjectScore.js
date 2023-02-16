@@ -19,6 +19,24 @@ export const getAllSubjectScoreByUserID = (user_id, callback) => {
     });
 };
 
+export const getAllMySubject = (callback) => {
+  const axios = AxiosConfig();
+  let api = `/subjectScore/my-subject`;
+
+  axios
+    .get(api)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => getAllMySubject(callback));
+      } else {
+        callback(err.response.data);
+      }
+    });
+};
+
 export const getAllSubjectScoreSemesterByUser = (
   user_id,
   semester_id,

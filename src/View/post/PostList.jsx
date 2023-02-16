@@ -37,14 +37,7 @@ const PostList = () => {
   }, [image]);
 
   const onFinishCreatePost = () => {
-    const newPost = {
-      image: image,
-      user_id: user._id,
-      content: form.getFieldValue().content ? form.getFieldValue().content : "",
-      tags: form.getFieldValue().tags ? form.getFieldValue().tags : "",
-    };
-
-    createPost(newPost, (res) => {
+    createPost(form.getFieldValue(), (res) => {
       if (res.status === 1) {
         window.location.reload();
       } else {
@@ -77,7 +70,7 @@ const PostList = () => {
       icon: <ExclamationCircleOutlined />,
       content: (
         <>
-          <UploadImage imageUrl={image} setImageUrl={setImage} />
+          <UploadImage form={form} />
           <Form {...formItemLayout} form={form} onFinish={onFinishCreatePost}>
             <Form.Item label={"Content"} labelAlign="left" name="content">
               <Input placeholder="Your content here" />

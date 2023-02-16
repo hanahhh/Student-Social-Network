@@ -32,97 +32,113 @@ const Register = () => {
       <Row
         justify="center"
         align="middle"
-        style={{ width: "100vw", height: "100vh" }}
+        style={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+        }}
       >
-        <Col md={12} sm={16} justify="center" className="col-guest">
-          <Form {...formItemLayout} onFinish={onFinish} form={form}>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-              label={"User name"}
-              labelAlign="left"
-              name="name"
-            >
-              <Input placeholder="Please input user name" />
-            </Form.Item>
-            <Form.Item
-              rules={[
-                {
-                  validator: (_, value) => {
-                    if (value) {
-                      let regex_email = new RegExp(REGEX.REGEX_EMAIL);
-                      if (regex_email.test(value)) {
-                        return Promise.resolve();
+        <Col
+          md={12}
+          sm={16}
+          justify="center"
+          className="col-guest"
+          style={{ maxWidth: "450px" }}
+        >
+          <div style={{ padding: "10px" }}>
+            <Form {...formItemLayout} onFinish={onFinish} form={form}>
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                label={"User name"}
+                labelAlign="left"
+                name="name"
+              >
+                <Input placeholder="Please input user name" />
+              </Form.Item>
+              <Form.Item
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (value) {
+                        let regex_email = new RegExp(REGEX.REGEX_EMAIL);
+                        if (regex_email.test(value)) {
+                          return Promise.resolve();
+                        } else {
+                          return Promise.reject(
+                            new Error("Please enter a valid email!")
+                          );
+                        }
                       } else {
                         return Promise.reject(
-                          new Error("Please enter a valid email!")
+                          new Error("Please input your email!")
                         );
                       }
-                    } else {
+                    },
+                  },
+                ]}
+                label={"Email"}
+                labelAlign="left"
+                name="email"
+              >
+                <Input placeholder="Please input email" />
+              </Form.Item>
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                label={"Password"}
+                labelAlign="left"
+                name="password"
+              >
+                <Input.Password placeholder="Please input password" />
+              </Form.Item>
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                    message: "Please confirm your password!",
+                  },
+                  ({ getFieldValue }) => ({
+                    validator(rule, value) {
+                      if (!value || getFieldValue("password") === value) {
+                        return Promise.resolve();
+                      }
                       return Promise.reject(
-                        new Error("Please input your email!")
+                        "The two passwords that you entered do not match!"
                       );
-                    }
-                  },
-                },
-              ]}
-              label={"Email"}
-              labelAlign="left"
-              name="email"
-            >
-              <Input placeholder="Please input email" />
-            </Form.Item>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-              label={"Password"}
-              labelAlign="left"
-              name="password"
-            >
-              <Input.Password placeholder="Please input password" />
-            </Form.Item>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: "Please confirm your password!",
-                },
-                ({ getFieldValue }) => ({
-                  validator(rule, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(
-                      "The two passwords that you entered do not match!"
-                    );
-                  },
-                }),
-              ]}
-              label={"Confirm your password"}
-              labelAlign="left"
-              name="confirm_password"
-            >
-              <Input.Password placeholder="Please input password" />
-            </Form.Item>
+                    },
+                  }),
+                ]}
+                label={"Confirm your password"}
+                labelAlign="left"
+                name="confirm_password"
+              >
+                <Input.Password placeholder="Please input password" />
+              </Form.Item>
+              <div className="nav-guest">
+                <button htmltype="submit" className="button-guest">
+                  Register
+                </button>{" "}
+              </div>
+            </Form>
+            <Divider style={{ color: "grey", fontSize: "14px" }}>
+              Already have a MyScoreX account?
+            </Divider>
             <div className="nav-guest">
-              <button htmltype="submit" className="button-guest">
-                Register
-              </button>{" "}
+              <button
+                onClick={() => navigate("/login")}
+                className="button-guest"
+              >
+                Login
+              </button>
             </div>
-          </Form>
-          <Divider style={{ color: "grey", fontSize: "14px" }}>
-            Already have a MyScoreX account?
-          </Divider>
-          <div className="nav-guest">
-            <button onClick={() => navigate("/login")} className="button-guest">
-              Login
-            </button>
           </div>
         </Col>
       </Row>

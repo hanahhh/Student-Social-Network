@@ -63,7 +63,10 @@ const PredictSemester = ({
                 },
               ]}
             >
-              <Input style={{ width: "60vw" }} placeholder={"GPA desired !"} />
+              <Input
+                style={{ minWidth: "700px", width: "100%" }}
+                placeholder={"GPA desired !"}
+              />
             </Form.Item>
           </Form>
         </>

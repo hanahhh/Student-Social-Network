@@ -1,8 +1,8 @@
+import { List } from "antd";
 import React, { useEffect, useState } from "react";
-import PostUser from "./PostUser";
-import { List, message } from "antd";
+import "../css/PostList.scss";
 import { getPostByUserID } from "../service/post";
-import { useSelector } from "react-redux";
+import PostNeighbor from "./PostNeighbor";
 
 const Post = ({ user_id }) => {
   const [myPost, setMyPost] = useState([]);
@@ -24,7 +24,7 @@ const Post = ({ user_id }) => {
         dataSource={myPost}
         renderItem={(item, index) => (
           <List.Item>
-            <PostUser post={item} key={index} />
+            <PostNeighbor post={item} key={index} />
           </List.Item>
         )}
       />

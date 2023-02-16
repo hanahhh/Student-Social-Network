@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Form, Input, message, Radio } from "antd";
+import { Form, Input, message, Radio, Select } from "antd";
 import { formItemLayout } from "../../../configs/form";
 import UploadImage from "../../../components/UploadImage";
 import { useSelector } from "react-redux";
 import { getUserInfo, updateUserByID } from "../../../service/user";
 
+const { Option } = Select;
+
 const Setting = () => {
   const user = useSelector((state) => state.auth.data);
+  const schools = useSelector((state) => state.school.data);
   const [data, setData] = useState();
   const [image, setImage] = useState("");
   const [form] = Form.useForm();
@@ -14,7 +17,7 @@ const Setting = () => {
   useEffect(() => {
     getUserInfo((res) => {
       if (res.status === 1) {
-        form.setFieldsValue(res.data.user);
+        form.setFieldsValue({ ...res.data.user, image: res.data.user.avatar });
         setImage(res.data.user.avatar);
         setData(res.data.user);
       } else {
@@ -24,7 +27,8 @@ const Setting = () => {
   }, []);
 
   const onFinish = (values) => {
-    if (image !== "") values = { ...values, avatar: image };
+    if (form.getFieldValue().image !== "")
+      values = { ...values, avatar: form.getFieldValue().image };
     updateUserByID(user._id, values, (res) => {
       if (res.status === 1) {
         message.success("Update user successfully !");
@@ -47,7 +51,7 @@ const Setting = () => {
       <p style={{ fontSize: "24px" }}>Change your profile</p>
       <div className="avatar">
         <p>Change your avatar</p>
-        <UploadImage imageUrl={image} setImageUrl={setImage} />
+        <UploadImage form={form} />
       </div>
       <Form {...formItemLayout} form={form} onFinish={onFinish}>
         <Form.Item label={"User name"} labelAlign="left" name="name">
@@ -68,6 +72,26 @@ const Setting = () => {
         </Form.Item>
         <Form.Item label={"Website"} labelAlign="left" name="website">
           <Input placeholder="Please input your website" />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+            },
+          ]}
+          label={"School"}
+          labelAlign="left"
+          name="school_id"
+        >
+          <Select style={{ width: "100%" }} placeholder="select school">
+            {schools?.map((school, index) => {
+              return (
+                <Option value={school._id} key={index}>
+                  {school.school_code} - {school.name}
+                </Option>
+              );
+            })}
+          </Select>
         </Form.Item>
         <Form.Item label={"Education"} labelAlign="left" name="education">
           <Input placeholder="Please input your education" />

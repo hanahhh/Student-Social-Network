@@ -6,10 +6,12 @@ export const userLogin = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const axios = AxiosConfig();
+
       const res = await axios.post(
         `${process.env.REACT_APP_API}/auth/login`,
         data
       );
+      console.log(res);
       localStorage.setItem(
         `${process.env.REACT_APP_PREFIX_LOCAL}_access_token`,
         res.data.data.access_token

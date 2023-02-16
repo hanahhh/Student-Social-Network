@@ -97,3 +97,39 @@ export const uploadImagePost = (image, callback) => {
       }
     });
 };
+
+export const deletePost = (post_id, callback) => {
+  const axios = AxiosConfig();
+  let api = `/post/${post_id}`;
+
+  axios
+    .delete(api)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => deletePost(post_id, callback));
+      } else {
+        callback(err.response.data);
+      }
+    });
+};
+
+export const updatePost = (post_id, data, callback) => {
+  const axios = AxiosConfig();
+  let api = `/post/detail/${post_id}`;
+
+  axios
+    .put(api, data)
+    .then((res) => {
+      callback(res.data);
+    })
+    .catch((err) => {
+      if (err.response.status === 403) {
+        getToken(() => updatePost(post_id, data, callback));
+      } else {
+        callback(err.response.data);
+      }
+    });
+};

@@ -57,12 +57,7 @@ const UserInfo = ({ user, user_id }) => {
       render: (semester) => <>{semester}</>,
       responsive: ["lg"],
     },
-    {
-      title: "Schedule",
-      dataIndex: "schedule",
-      render: (schedule) => <>{schedule ? schedule : "NULL"}</>,
-      responsive: ["lg"],
-    },
+
     {
       title: "Status",
       dataIndex: "subject_status",
@@ -70,6 +65,7 @@ const UserInfo = ({ user, user_id }) => {
     },
   ];
 
+  console.log(user);
   useEffect(() => {
     user.educationStatus === educationStatus.ENABLE &&
       getAllSubjectScoreByUserID(user_id, (res) => {
@@ -82,9 +78,14 @@ const UserInfo = ({ user, user_id }) => {
       });
   }, []);
   return (
-    <div style={{ width: "100%", overflowX: "auto", padding: "10px" }}>
-      <div style={{ width: "fit-content" }}>
-        <Table dataSource={data} columns={columns} />
+    <div className="userinfo">
+      <p style={{ padding: "10px" }}>
+        <span style={{ fontWeight: "bold" }}>CPA: </span> {user.cpa}
+      </p>
+      <div style={{ width: "100%", overflowX: "auto", padding: "10px" }}>
+        <div style={{ width: "fit-content" }}>
+          <Table dataSource={data} columns={columns} />
+        </div>
       </div>
     </div>
   );

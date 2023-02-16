@@ -41,50 +41,63 @@ const Login = () => {
       <Row
         justify="center"
         align="middle"
-        style={{ width: "100vw", height: "100vh" }}
+        style={{
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+        }}
       >
-        <Col md={12} sm={16} justify="center" className="col-guest">
-          <Form {...formItemLayout} onFinish={onFinish} form={form}>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-              label={"Email"}
-              labelAlign="left"
-              name="email"
-            >
-              <Input placeholder="Please input email" />
-            </Form.Item>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                },
-              ]}
-              label={"Password"}
-              labelAlign="left"
-              name="password"
-            >
-              <Input.Password placeholder="Please input password" />
-            </Form.Item>
+        <Col
+          md={12}
+          sm={16}
+          justify="center"
+          className="col-guest"
+          style={{ maxWidth: "450px" }}
+        >
+          <div style={{ padding: "10px" }}>
+            <Form {...formItemLayout} onFinish={onFinish} form={form}>
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                label={"Email"}
+                labelAlign="left"
+                name="email"
+              >
+                <Input placeholder="Please input email" />
+              </Form.Item>
+              <Form.Item
+                rules={[
+                  {
+                    required: true,
+                  },
+                ]}
+                label={"Password"}
+                labelAlign="left"
+                name="password"
+              >
+                <Input.Password placeholder="Please input password" />
+              </Form.Item>
+              <div className="nav-guest">
+                <button htmltype="submit" className="button-guest">
+                  Login
+                </button>{" "}
+              </div>
+            </Form>
+            <Divider style={{ color: "grey", fontSize: "14px" }}>
+              Don't have a MyScoreX account?
+            </Divider>
             <div className="nav-guest">
-              <button htmltype="submit" className="button-guest">
-                Login
-              </button>{" "}
+              <button
+                onClick={() => navigate("/register")}
+                className="button-guest"
+              >
+                Register
+              </button>
             </div>
-          </Form>
-          <Divider style={{ color: "grey", fontSize: "14px" }}>
-            Don't have a MyScoreX account?
-          </Divider>
-          <div className="nav-guest">
-            <button
-              onClick={() => navigate("/register")}
-              className="button-guest"
-            >
-              Register
-            </button>
           </div>
         </Col>
       </Row>

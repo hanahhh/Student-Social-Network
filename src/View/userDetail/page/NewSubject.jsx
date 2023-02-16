@@ -9,12 +9,14 @@ const { Option } = Select;
 
 const NewSubject = () => {
   const [form] = Form.useForm();
+  const user = useSelector((state) => state.auth.data);
   const schools = useSelector((state) => state.school.data);
   const categories = useSelector((state) => state.category.data);
   const [department, setDepartment] = useState([]);
 
   const onFinish = (values) => {
-    createSubject(values, (res) => {
+    const newSubject = { ...values, user_id: user._id };
+    createSubject(newSubject, (res) => {
       if (res.status === 1) {
         message.success("Create subject successful !");
       } else {
@@ -23,6 +25,10 @@ const NewSubject = () => {
     });
   };
   const handleChangeSchool = (value) => {
+    form.resetFields();
+    form.setFieldsValue({
+      school_id: value,
+    });
     getAllDepartmentBySchool(value, (res) => {
       if (res.status === 1) {
         setDepartment(res.data.result);

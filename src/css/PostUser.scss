@@ -10,6 +10,7 @@
         width: 32vw;
         height: 32vw;
     }
+    
 }
 .modal-image {
     width: 100%;
@@ -20,11 +21,25 @@
     max-width: 600px !important;
 }
 
+.edit {
+    position: absolute;
+    right: 5px;
+}
+
 .tags {
     display: flex;
     .tag {
         margin-right: 5px;
         cursor: pointer;
         color: rgb(29, 29, 163);
+    }
+}
+
+.icon-action {
+    width: 75px;
+    display: flex;
+    align-items: center;
+    p {
+        margin-left: 10px !important;
     }
 }

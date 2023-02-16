@@ -30,6 +30,7 @@ import { getPredictResultSemesterByUser } from "../../../service/predictResult";
 import { createSemester, getListSemester } from "../../../service/semester";
 import {
   deleteSubjectScore,
+  getAllMySubject,
   getAllSubjectScoreByUserID,
   getAllSubjectScoreSemesterByUser,
   getCPARecommendation,
@@ -147,7 +148,7 @@ const Study = ({ user }) => {
   };
 
   useEffect(() => {
-    getAllSubjectScoreByUserID(auth?._id, (res) => {
+    getAllMySubject((res) => {
       if (res.status === 1) {
         const result = res.data.map((score, index) => {
           return { ...score, key: index + 1 };
@@ -250,7 +251,10 @@ const Study = ({ user }) => {
               label="How many credits do you want to take ?"
               name={"credits"}
             >
-              <Input style={{ width: "60vw" }} placeholder={"Input credits"} />
+              <Input
+                style={{ maxWidth: "700px", width: "100%" }}
+                placeholder={"Input credits"}
+              />
             </Form.Item>
           </Form>
         </>
@@ -279,7 +283,10 @@ const Study = ({ user }) => {
             onFinish={onFinishAddSemester}
           >
             <Form.Item name={"name"}>
-              <Input style={{ width: "60vw" }} placeholder={"Input schedule"} />
+              <Input
+                style={{ minWidth: "700px", width: "100%" }}
+                placeholder={"Input schedule"}
+              />
             </Form.Item>
           </Form>
         </>

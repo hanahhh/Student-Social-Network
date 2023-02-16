@@ -32,7 +32,7 @@ const TheSidebar = ({ menu }) => {
             onClick={() => handleChooseIcon(item)}
             className="icon-sidebar"
           >
-            {item.to === iconChoosing ? (
+            {`/${item.to.split("/")[1]}` === iconChoosing ? (
               <div>
                 <item.iconFill style={{ fontSize: "25px" }} />
                 <span className="label">{item.label}</span>
